@@ -106,14 +106,14 @@ export async function registerRoutes(
   });
 
   app.patch(api.drinks.update.path, requireAuth, async (req, res) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const input = api.drinks.update.input.parse(req.body);
     const updated = await storage.updateDrink(id, input);
     res.json(updated);
   });
 
   app.delete(api.drinks.delete.path, requireAuth, async (req, res) => {
-    await storage.deleteDrink(parseInt(req.params.id));
+    await storage.deleteDrink(parseInt(req.params.id as string));
     res.sendStatus(204);
   });
 
@@ -130,11 +130,12 @@ export async function registerRoutes(
     }
 
     if (req.query.status) {
-      filters.status = req.query.status as string;
+      const statusStr = req.query.status as string;
+      filters.status = statusStr;
     }
 
-    const orders = await storage.getOrders(filters);
-    res.json(orders);
+    const ordersData = await storage.getOrders(filters);
+    res.json(ordersData);
   });
 
   app.post(api.orders.create.path, requireAuth, async (req, res) => {
@@ -151,7 +152,7 @@ export async function registerRoutes(
   });
 
   app.patch(api.orders.updateStatus.path, requireAuth, async (req, res) => {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
     const { status, rejectionReason } = req.body;
     const updated = await storage.updateOrderStatus(id, status, rejectionReason);
     res.json(updated);

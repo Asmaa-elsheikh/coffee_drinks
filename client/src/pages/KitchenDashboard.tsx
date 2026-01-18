@@ -6,11 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useLocation } from "wouter";
 import { format } from "date-fns";
-import { Check, X, ChefHat, Clock, AlertCircle } from "lucide-react";
+import { Check, X, ChefHat, Clock, AlertCircle, Coffee } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function KitchenDashboard() {
   const { user } = useAuth();
@@ -36,7 +37,7 @@ export default function KitchenDashboard() {
   };
 
   // If on history tab, show only history
-  if (location === "/kitchen/history") {
+  if (location.startsWith("/kitchen/history")) {
     return (
       <div className="space-y-8">
         <div>
@@ -54,7 +55,7 @@ export default function KitchenDashboard() {
                     <span className="text-xs text-muted-foreground">{format(new Date(order.createdAt), "MMM d, h:mm a")}</span>
                   </div>
                   <div className="flex items-center gap-4">
-                    <StatusBadge status={order.status} />
+                    <StatusBadge status={order.status as any} />
                   </div>
                 </div>
               ))}

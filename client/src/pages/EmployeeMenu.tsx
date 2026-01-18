@@ -10,15 +10,17 @@ import { useLocation } from "wouter";
 import { format } from "date-fns";
 
 export default function EmployeeMenu() {
+  const [location, setLocation] = useLocation();
   const { drinks, isLoading: isLoadingDrinks } = useDrinks();
   const { user } = useAuth();
   const { createOrder, isCreating } = useOrders();
   const isHistoryTab = location === "/history";
   
-  const { data: recentOrders } = useOrders(
+  const ordersResult = useOrders(
     isHistoryTab ? { userId: String(user?.id) } : { userId: String(user?.id) }, 
     10000
   );
+  const recentOrders = ordersResult.orders;
 
   if (!user) {
     setLocation("/login");
@@ -49,7 +51,7 @@ export default function EmployeeMenu() {
                         {order.sugar}
                       </span>
                     )}
-                    <StatusBadge status={order.status} />
+                    <StatusBadge status={order.status as any} />
                   </div>
                 </div>
               ))}
@@ -137,7 +139,7 @@ export default function EmployeeMenu() {
                         {order.sugar}
                       </span>
                     )}
-                    <StatusBadge status={order.status} />
+                    <StatusBadge status={order.status as any} />
                   </div>
                 </div>
               ))}

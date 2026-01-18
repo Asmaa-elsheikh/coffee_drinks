@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { users, drinks, orders, type User, type InsertUser, type Drink, type InsertDrink, type Order, type InsertOrder } from "@shared/schema";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, sql } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -68,14 +68,17 @@ export class DatabaseStorage implements IStorage {
         user: true,
       },
       orderBy: desc(orders.createdAt),
-      where: (orders, { eq, and }) => {
+      where: (ordersTable, { eq, and }) => {
         const conditions = [];
-        if (filters?.status) conditions.push(eq(orders.status, filters.status));
-        if (filters?.userId) conditions.push(eq(orders.userId, filters.userId));
+        if (filters?.status) {
+          const statusList = filters.status.split(',') as any[];
+          conditions.push(sql`${ordersTable.status} IN ${statusList}`);
+        }
+        if (filters?.userId) conditions.push(eq(ordersTable.userId, filters.userId));
         return conditions.length ? and(...conditions) : undefined;
       },
     });
-    return query;
+    return query as any;
   }
 
   async getOrder(id: number): Promise<Order | undefined> {
@@ -88,7 +91,7 @@ export class DatabaseStorage implements IStorage {
     return newOrder;
   }
 
-  async updateOrderStatus(id: number, status: string, rejectionReason?: string): Promise<Order> {
+  async updateOrderStatus(id: number, status: any, rejectionReason?: string): Promise<Order> {
     const [updated] = await db
       .update(orders)
       .set({ 

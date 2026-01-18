@@ -62,12 +62,13 @@ export const insertOrderSchema = createInsertSchema(orders).omit({
   id: true, 
   createdAt: true, 
   updatedAt: true,
-  status: true // Status is managed by system/kitchen
+  status: true 
 });
 
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Drink = typeof drinks.$inferSelect;
+export type InsertDrink = z.infer<typeof insertDrinkSchema>;
 export type Order = typeof orders.$inferSelect;
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
