@@ -13,12 +13,54 @@ export default function EmployeeMenu() {
   const { drinks, isLoading: isLoadingDrinks } = useDrinks();
   const { user } = useAuth();
   const { createOrder, isCreating } = useOrders();
-  const { data: recentOrders } = useOrders({ userId: String(user?.id) }, 10000); // Refresh history
-  const [, setLocation] = useLocation();
+  const isHistoryTab = location === "/history";
+  
+  const { data: recentOrders } = useOrders(
+    isHistoryTab ? { userId: String(user?.id) } : { userId: String(user?.id) }, 
+    10000
+  );
 
   if (!user) {
     setLocation("/login");
     return null;
+  }
+
+  // If on history tab, show only history
+  if (isHistoryTab) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h2 className="text-3xl font-display font-bold">My Order History</h2>
+          <p className="text-muted-foreground">Review your past drink requests</p>
+        </div>
+        
+        <Card className="rounded-2xl overflow-hidden border-border/50">
+          <ScrollArea className="h-[calc(100vh-250px)]">
+            <div className="p-0">
+              {recentOrders?.map((order) => (
+                <div key={order.id} className="flex items-center justify-between p-4 border-b last:border-0 hover:bg-muted/30 transition-colors">
+                  <div className="flex flex-col">
+                    <span className="font-medium">{order.drink.name}</span>
+                    <span className="text-xs text-muted-foreground">{format(new Date(order.createdAt), "MMM d, h:mm a")}</span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    {order.sugar && order.sugar !== "None" && (
+                      <span className="text-xs px-2 py-1 bg-muted rounded-full text-muted-foreground hidden sm:inline-block">
+                        {order.sugar}
+                      </span>
+                    )}
+                    <StatusBadge status={order.status} />
+                  </div>
+                </div>
+              ))}
+              {(!recentOrders || recentOrders.length === 0) && (
+                <div className="p-8 text-center text-muted-foreground">No orders yet.</div>
+              )}
+            </div>
+          </ScrollArea>
+        </Card>
+      </div>
+    );
   }
 
   // Get only the absolute latest order to show status

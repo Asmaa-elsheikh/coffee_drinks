@@ -183,8 +183,8 @@ export async function registerRoutes(
 }
 
 async function seed() {
-  const existingUsers = await storage.getUserByUsername("admin");
-  if (!existingUsers) {
+  const adminUser = await storage.getUserByUsername("admin");
+  if (!adminUser) {
     // Create Users
     await storage.createUser({ 
       username: "admin", 
@@ -206,9 +206,17 @@ async function seed() {
     });
 
     // Create Drinks
-    await storage.createDrink({ name: "Espresso", category: "Coffee", preparationTime: 3, isAvailable: true, description: "Strong black coffee" });
-    await storage.createDrink({ name: "Latte", category: "Coffee", preparationTime: 5, isAvailable: true, description: "Milky coffee" });
-    await storage.createDrink({ name: "Green Tea", category: "Tea", preparationTime: 3, isAvailable: true, description: "Refreshing tea" });
-    await storage.createDrink({ name: "Orange Juice", category: "Juice", preparationTime: 2, isAvailable: true, description: "Freshly squeezed" });
+    const drinksList = [
+      { name: "Tea", category: "Tea", preparationTime: 3, isAvailable: true, description: "Classic hot tea" },
+      { name: "Turkish Coffee", category: "Coffee", preparationTime: 5, isAvailable: true, description: "Traditional Turkish coffee" },
+      { name: "French Coffee", category: "Coffee", preparationTime: 5, isAvailable: true, description: "Smooth French press coffee" },
+      { name: "Nescafe", category: "Coffee", preparationTime: 2, isAvailable: true, description: "Quick instant coffee" },
+      { name: "Espresso", category: "Coffee", preparationTime: 2, isAvailable: true, description: "Strong single shot" },
+      { name: "Herbs", category: "Tea", preparationTime: 4, isAvailable: true, description: "Assorted herbal infusion" }
+    ];
+
+    for (const drink of drinksList) {
+      await storage.createDrink(drink);
+    }
   }
 }

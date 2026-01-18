@@ -35,6 +35,39 @@ export default function KitchenDashboard() {
     }
   };
 
+  // If on history tab, show only history
+  if (location === "/kitchen/history") {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h2 className="text-3xl font-display font-bold">Kitchen Order History</h2>
+          <p className="text-muted-foreground">Review completed and rejected orders</p>
+        </div>
+        
+        <Card className="rounded-2xl overflow-hidden border-border/50">
+          <ScrollArea className="h-[calc(100vh-250px)]">
+            <div className="p-0">
+              {orders?.filter(o => ["completed", "rejected"].includes(o.status)).map((order) => (
+                <div key={order.id} className="flex items-center justify-between p-4 border-b last:border-0 hover:bg-muted/30 transition-colors">
+                  <div className="flex flex-col">
+                    <span className="font-medium">{order.drink.name} (for {order.user.name})</span>
+                    <span className="text-xs text-muted-foreground">{format(new Date(order.createdAt), "MMM d, h:mm a")}</span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <StatusBadge status={order.status} />
+                  </div>
+                </div>
+              ))}
+              {(!orders || orders.filter(o => ["completed", "rejected"].includes(o.status)).length === 0) && (
+                <div className="p-8 text-center text-muted-foreground">No history yet.</div>
+              )}
+            </div>
+          </ScrollArea>
+        </Card>
+      </div>
+    );
+  }
+
   const pendingOrders = orders?.filter(o => o.status === "pending") || [];
   const activeOrders = orders?.filter(o => ["accepted", "in_preparation"].includes(o.status)) || [];
 

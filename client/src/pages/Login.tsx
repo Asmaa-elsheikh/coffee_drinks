@@ -59,11 +59,23 @@ export default function Login() {
                 Sign In
               </Button>
               
-              <div className="text-center text-xs text-muted-foreground mt-4">
-                <p>Demo accounts:</p>
-                <p>Employee: alice / password</p>
-                <p>Kitchen: chef / password</p>
-                <p>Admin: admin / password</p>
+              <div className="bg-muted/50 p-4 rounded-xl text-xs space-y-2 border border-border mt-4">
+                <p className="font-semibold text-foreground uppercase tracking-wider">Demo Credentials:</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <p className="text-muted-foreground">Employee:</p>
+                    <p className="font-mono">employee1 / password123</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Kitchen:</p>
+                    <p className="font-mono">kitchen / password123</p>
+                  </div>
+                  <div className="col-span-2 pt-1 border-t border-border/50">
+                    <p className="text-muted-foreground">Admin:</p>
+                    <p className="font-mono">admin / password123</p>
+                  </div>
+                </div>
+                <p className="pt-2 text-[10px] text-muted-foreground italic">* Role-based portals: Admin manages menu, Kitchen handles queue, Employee orders.</p>
               </div>
             </form>
           </CardContent>
