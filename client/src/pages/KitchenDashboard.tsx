@@ -39,20 +39,20 @@ export default function KitchenDashboard() {
   const activeOrders = orders?.filter(o => ["accepted", "in_preparation"].includes(o.status)) || [];
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 md:space-y-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-display font-bold flex items-center gap-3">
-            <ChefHat className="text-primary" size={32} />
+          <h2 className="text-2xl md:text-3xl font-display font-bold flex items-center gap-3">
+            <ChefHat className="text-primary shrink-0" size={32} />
             Kitchen Queue
           </h2>
-          <p className="text-muted-foreground">Manage incoming drink orders</p>
+          <p className="text-sm md:text-base text-muted-foreground">Manage incoming drink orders</p>
         </div>
-        <div className="flex gap-4">
-          <Badge variant="secondary" className="text-lg px-4 py-1">
-            {pendingOrders.length} Pending
+        <div className="flex gap-2 sm:gap-4">
+          <Badge variant="secondary" className="text-sm md:text-lg px-3 md:px-4 py-1">
+            {pendingOrders.length} New
           </Badge>
-          <Badge variant="outline" className="text-lg px-4 py-1 border-primary text-primary">
+          <Badge variant="outline" className="text-sm md:text-lg px-3 md:px-4 py-1 border-primary text-primary">
             {activeOrders.length} Active
           </Badge>
         </div>

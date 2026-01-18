@@ -27,42 +27,42 @@ export default function EmployeeMenu() {
   );
 
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6 md:space-y-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-display font-bold">Drink Menu</h2>
-          <p className="text-muted-foreground">What would you like today, {user.name}?</p>
+          <h2 className="text-2xl md:text-3xl font-display font-bold">Drink Menu</h2>
+          <p className="text-sm md:text-base text-muted-foreground">What would you like today, {user.name}?</p>
         </div>
       </div>
 
       {activeOrder && (
-        <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 flex items-center justify-between animate-enter shadow-sm">
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <h3 className="font-semibold text-lg">Current Order: {activeOrder.drink.name}</h3>
+        <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 md:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-enter shadow-sm">
+          <div className="w-full sm:w-auto">
+            <div className="flex flex-wrap items-center gap-3 mb-1">
+              <h3 className="font-semibold text-lg truncate max-w-[200px]">Current Order: {activeOrder.drink.name}</h3>
               <StatusBadge status={activeOrder.status} />
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs md:text-sm text-muted-foreground">
               Ordered at {format(new Date(activeOrder.createdAt), "h:mm a")}
             </p>
           </div>
           {activeOrder.status === "ready" && (
-            <div className="text-right">
+            <div className="sm:text-right w-full sm:w-auto p-2 bg-accent/10 sm:bg-transparent rounded-lg border sm:border-0 border-accent/20">
               <p className="text-accent font-bold">Ready for Pickup!</p>
-              <p className="text-xs text-muted-foreground">Don't let it get cold.</p>
+              <p className="text-[10px] md:text-xs text-muted-foreground">Don't let it get cold.</p>
             </div>
           )}
         </div>
       )}
 
       {isLoadingDrinks ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
           {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-[300px] w-full rounded-2xl" />
+            <Skeleton key={i} className="h-[280px] md:h-[300px] w-full rounded-2xl" />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
           {drinks?.map((drink) => (
             <DrinkCard 
               key={drink.id} 

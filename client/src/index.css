@@ -80,6 +80,14 @@
   .hover-scale {
     @apply transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98];
   }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 /* Animation utilities */
