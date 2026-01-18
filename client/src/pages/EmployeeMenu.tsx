@@ -17,7 +17,7 @@ export default function EmployeeMenu() {
   const isHistoryTab = location === "/history";
   
   const ordersResult = useOrders(
-    isHistoryTab ? { userId: String(user?.id) } : { userId: String(user?.id) }, 
+    { userId: String(user?.id) }, 
     10000
   );
   const recentOrders = ordersResult.orders;

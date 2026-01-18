@@ -134,6 +134,7 @@ export async function registerRoutes(
       filters.status = statusStr;
     }
 
+    console.log(`Fetching orders for user ${user.id} (${user.role}) with filters:`, filters);
     const ordersData = await storage.getOrders(filters);
     res.json(ordersData);
   });
