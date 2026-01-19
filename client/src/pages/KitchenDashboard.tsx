@@ -15,7 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function KitchenDashboard() {
   const { user } = useAuth();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   // Poll every 5 seconds for new orders
   const { orders, isLoading, updateStatus } = useOrders({ status: "pending,accepted,in_preparation" }, 5000);
   
