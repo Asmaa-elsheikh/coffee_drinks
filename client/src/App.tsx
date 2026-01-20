@@ -81,6 +81,10 @@ function Router() {
         {() => <ProtectedRoute component={AdminDashboard} allowedRoles={["admin"]} />}
       </Route>
 
+      <Route path="/admin/menu">
+        {() => <ProtectedRoute component={AdminDashboard} allowedRoles={["admin"]} />}
+      </Route>
+
       <Route component={NotFound} />
     </Switch>
   );
