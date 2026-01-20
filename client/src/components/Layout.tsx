@@ -27,7 +27,6 @@ export function Layout({ children, showNav = true }: LayoutProps) {
       return [
         { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
         { href: "/admin/menu", label: "Menu Management", icon: Coffee },
-        { href: "/", label: "Menu View", icon: Coffee },
       ];
     }
     if (user?.role === "kitchen") {
