@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, Edit2, TrendingUp, Users, Coffee } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
@@ -16,7 +17,7 @@ export default function AdminDashboard() {
   const { data: analytics, isLoading: isLoadingAnalytics } = useAnalytics();
   const { drinks, createDrink, updateDrink, deleteDrink } = useDrinks();
   const { user } = useAuth();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
 
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editingDrink, setEditingDrink] = useState<any>(null);
@@ -79,9 +80,129 @@ export default function AdminDashboard() {
     setIsEditOpen(true);
   };
 
+  const isMenuView = location === "/admin/menu";
+
   // Prepare chart data
   const chartData = analytics?.popularDrinks.slice(0, 5) || [];
   const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+
+  if (isMenuView) {
+    return (
+      <div className="space-y-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-3xl font-display font-bold">Menu Management</h2>
+            <p className="text-muted-foreground">Add, edit, or remove drinks from the menu</p>
+          </div>
+          <Button onClick={startCreate} className="gap-2">
+            <Plus size={16} /> Add Drink
+          </Button>
+        </div>
+
+        <Card className="rounded-2xl overflow-hidden border-border/50">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Prep Time</TableHead>
+                <TableHead>Availability</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {drinks?.map((drink) => (
+                <TableRow key={drink.id}>
+                  <TableCell className="font-medium">{drink.name}</TableCell>
+                  <TableCell>{drink.category}</TableCell>
+                  <TableCell>{drink.preparationTime} mins</TableCell>
+                  <TableCell>
+                    {drink.isAvailable ? (
+                      <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50">Available</Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-red-600 border-red-200 bg-red-50">Unavailable</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right space-x-2">
+                    <Button variant="ghost" size="icon" onClick={() => startEdit(drink)}>
+                      <Edit2 size={16} />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => deleteDrink(drink.id)}>
+                      <Trash2 size={16} />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Card>
+
+        {/* Edit/Add Dialog is shared below */}
+        {renderDialog()}
+      </div>
+    );
+  }
+
+  function renderDialog() {
+    return (
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingDrink ? "Edit Drink" : "Add New Drink"}</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="name">Name</Label>
+              <Input 
+                id="name" 
+                value={formData.name} 
+                onChange={(e) => setFormData({...formData, name: e.target.value})} 
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="category">Category</Label>
+              <Input 
+                id="category" 
+                value={formData.category} 
+                onChange={(e) => setFormData({...formData, category: e.target.value})} 
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="description">Description</Label>
+              <Input 
+                id="description" 
+                value={formData.description} 
+                onChange={(e) => setFormData({...formData, description: e.target.value})} 
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="prepTime">Preparation Time (mins)</Label>
+              <Input 
+                id="prepTime" 
+                type="number"
+                value={formData.preparationTime} 
+                onChange={(e) => setFormData({...formData, preparationTime: e.target.value})} 
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <input 
+                type="checkbox" 
+                id="available" 
+                checked={formData.isAvailable}
+                onChange={(e) => setFormData({...formData, isAvailable: e.target.checked})}
+                className="rounded border-gray-300"
+              />
+              <Label htmlFor="available">Available for ordering</Label>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>
+            <Button onClick={handleSave}>{editingDrink ? "Save Changes" : "Create Drink"}</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -194,62 +315,7 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{editingDrink ? "Edit Drink" : "Add New Drink"}</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="name">Name</Label>
-              <Input 
-                id="name" 
-                value={formData.name} 
-                onChange={(e) => setFormData({...formData, name: e.target.value})} 
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="category">Category</Label>
-              <Input 
-                id="category" 
-                value={formData.category} 
-                onChange={(e) => setFormData({...formData, category: e.target.value})} 
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="description">Description</Label>
-              <Input 
-                id="description" 
-                value={formData.description} 
-                onChange={(e) => setFormData({...formData, description: e.target.value})} 
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="prepTime">Preparation Time (mins)</Label>
-              <Input 
-                id="prepTime" 
-                type="number"
-                value={formData.preparationTime} 
-                onChange={(e) => setFormData({...formData, preparationTime: e.target.value})} 
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <input 
-                type="checkbox" 
-                id="available" 
-                checked={formData.isAvailable}
-                onChange={(e) => setFormData({...formData, isAvailable: e.target.checked})}
-                className="rounded border-gray-300"
-              />
-              <Label htmlFor="available">Available for ordering</Label>
-            </div>
-          </div>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>
-            <Button onClick={handleSave}>{editingDrink ? "Save Changes" : "Create Drink"}</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {renderDialog()}
     </div>
   );
 }
