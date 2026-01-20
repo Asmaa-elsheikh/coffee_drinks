@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useLocation } from "wouter";
 import { format } from "date-fns";
-import { Check, X, ChefHat, Clock, AlertCircle, Coffee } from "lucide-react";
+import { Check, X, ChefHat, Clock, AlertCircle, Coffee, ClipboardList } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
