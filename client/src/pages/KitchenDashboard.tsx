@@ -16,8 +16,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 export default function KitchenDashboard() {
   const { user } = useAuth();
   const [location, setLocation] = useLocation();
-  // Poll every 5 seconds for new orders
-  const { orders, isLoading, updateStatus } = useOrders({ status: "pending,accepted,in_preparation" }, 5000);
+  // Use different filters for history vs queue
+  const isHistoryPage = location.startsWith("/kitchen/history");
+  const { orders, isLoading, updateStatus } = useOrders(
+    { status: isHistoryPage ? "completed,rejected,ready" : "pending,accepted,in_preparation" }, 
+    5000
+  );
   
   const [rejectId, setRejectId] = useState<number | null>(null);
   const [rejectReason, setRejectReason] = useState("");
@@ -37,7 +41,7 @@ export default function KitchenDashboard() {
   };
 
   // If on history tab, show only history
-  if (location.startsWith("/kitchen/history")) {
+  if (isHistoryPage) {
     return (
       <div className="space-y-8">
         <div>
@@ -45,22 +49,29 @@ export default function KitchenDashboard() {
           <p className="text-muted-foreground">Review completed and rejected orders</p>
         </div>
         
-        <Card className="rounded-2xl overflow-hidden border-border/50">
+        <Card className="rounded-2xl overflow-hidden border-border/50 shadow-sm">
           <ScrollArea className="h-[calc(100vh-250px)]">
             <div className="p-0">
-              {orders?.filter(o => ["completed", "rejected"].includes(o.status)).map((order) => (
+              {orders?.map((order) => (
                 <div key={order.id} className="flex items-center justify-between p-4 border-b last:border-0 hover:bg-muted/30 transition-colors">
                   <div className="flex flex-col">
-                    <span className="font-medium">{order.drink.name} (for {order.user.name})</span>
-                    <span className="text-xs text-muted-foreground">{format(new Date(order.createdAt), "MMM d, h:mm a")}</span>
+                    <span className="font-medium text-lg">{order.drink.name}</span>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <span>for {order.user.name}</span>
+                      <span>•</span>
+                      <span>{format(new Date(order.createdAt), "MMM d, h:mm a")}</span>
+                    </div>
                   </div>
                   <div className="flex items-center gap-4">
                     <StatusBadge status={order.status as any} />
                   </div>
                 </div>
               ))}
-              {(!orders || orders.filter(o => ["completed", "rejected"].includes(o.status)).length === 0) && (
-                <div className="p-8 text-center text-muted-foreground">No history yet.</div>
+              {(!orders || orders.length === 0) && (
+                <div className="p-12 text-center text-muted-foreground">
+                  <ClipboardList className="mx-auto mb-4 opacity-20" size={48} />
+                  <p>No history records found.</p>
+                </div>
               )}
             </div>
           </ScrollArea>

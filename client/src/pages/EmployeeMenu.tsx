@@ -70,6 +70,16 @@ export default function EmployeeMenu() {
     ["pending", "accepted", "in_preparation", "ready"].includes(o.status)
   );
 
+  const getStatusMessage = (status: string) => {
+    switch (status) {
+      case "pending": return "Sent to kitchen";
+      case "accepted": return "Order received by kitchen";
+      case "in_preparation": return "Being prepared";
+      case "ready": return "Ready for pickup!";
+      default: return "";
+    }
+  };
+
   return (
     <div className="space-y-6 md:space-y-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -86,7 +96,10 @@ export default function EmployeeMenu() {
               <h3 className="font-semibold text-lg truncate max-w-[200px]">Current Order: {activeOrder.drink.name}</h3>
               <StatusBadge status={activeOrder.status} />
             </div>
-            <p className="text-xs md:text-sm text-muted-foreground">
+            <p className="text-sm font-medium text-primary mt-1">
+              {getStatusMessage(activeOrder.status)}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
               Ordered at {format(new Date(activeOrder.createdAt), "h:mm a")}
             </p>
           </div>
