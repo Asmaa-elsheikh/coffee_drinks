@@ -26,6 +26,7 @@ export function Layout({ children, showNav = true }: LayoutProps) {
     if (user?.role === "admin") {
       return [
         { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+        { href: "/admin/menu", label: "Menu Management", icon: Coffee },
         { href: "/", label: "Menu View", icon: Coffee },
       ];
     }

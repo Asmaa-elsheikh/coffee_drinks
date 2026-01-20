@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +14,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 
 export default function AdminDashboard() {
-  const { data: analytics, isLoading: isLoadingAnalytics } = useAnalytics();
+  const { data: analytics } = useAnalytics();
   const { drinks, createDrink, updateDrink, deleteDrink } = useDrinks();
   const { user } = useAuth();
   const [location, setLocation] = useLocation();
@@ -86,65 +86,160 @@ export default function AdminDashboard() {
   const chartData = analytics?.popularDrinks.slice(0, 5) || [];
   const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
-  if (isMenuView) {
-    return (
-      <div className="space-y-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-3xl font-display font-bold">Menu Management</h2>
-            <p className="text-muted-foreground">Add, edit, or remove drinks from the menu</p>
+  return (
+    <div className="space-y-8">
+      {isMenuView ? (
+        <div className="space-y-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-3xl font-display font-bold">Menu Management</h2>
+              <p className="text-muted-foreground">Add, edit, or remove drinks from the menu</p>
+            </div>
+            <Button onClick={startCreate} className="gap-2">
+              <Plus size={16} /> Add Drink
+            </Button>
           </div>
-          <Button onClick={startCreate} className="gap-2">
-            <Plus size={16} /> Add Drink
-          </Button>
-        </div>
 
-        <Card className="rounded-2xl overflow-hidden border-border/50">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Prep Time</TableHead>
-                <TableHead>Availability</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {drinks?.map((drink) => (
-                <TableRow key={drink.id}>
-                  <TableCell className="font-medium">{drink.name}</TableCell>
-                  <TableCell>{drink.category}</TableCell>
-                  <TableCell>{drink.preparationTime} mins</TableCell>
-                  <TableCell>
-                    {drink.isAvailable ? (
-                      <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50">Available</Badge>
-                    ) : (
-                      <Badge variant="outline" className="text-red-600 border-red-200 bg-red-50">Unavailable</Badge>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right space-x-2">
-                    <Button variant="ghost" size="icon" onClick={() => startEdit(drink)}>
-                      <Edit2 size={16} />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => deleteDrink(drink.id)}>
-                      <Trash2 size={16} />
-                    </Button>
-                  </TableCell>
+          <Card className="rounded-2xl overflow-hidden border-border/50 shadow-sm">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Prep Time</TableHead>
+                  <TableHead>Availability</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Card>
+              </TableHeader>
+              <TableBody>
+                {drinks?.map((drink) => (
+                  <TableRow key={drink.id}>
+                    <TableCell className="font-medium">{drink.name}</TableCell>
+                    <TableCell>{drink.category}</TableCell>
+                    <TableCell>{drink.preparationTime} mins</TableCell>
+                    <TableCell>
+                      {drink.isAvailable ? (
+                        <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50">Available</Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-red-600 border-red-200 bg-red-50">Unavailable</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right space-x-2">
+                      <Button variant="ghost" size="icon" onClick={() => startEdit(drink)}>
+                        <Edit2 size={16} />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => deleteDrink(drink.id)}>
+                        <Trash2 size={16} />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Card>
+        </div>
+      ) : (
+        <>
+          <div>
+            <h2 className="text-3xl font-display font-bold">Admin Dashboard</h2>
+            <p className="text-muted-foreground">Overview of system performance and menu management</p>
+          </div>
 
-        {/* Edit/Add Dialog is shared below */}
-        {renderDialog()}
-      </div>
-    );
-  }
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="shadow-md">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
+                <Coffee className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analytics?.totalOrders || 0}</div>
+                <p className="text-xs text-muted-foreground">Real-time status</p>
+              </CardContent>
+            </Card>
+            <Card className="shadow-md">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Active Menu Items</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{drinks?.length || 0}</div>
+                <p className="text-xs text-muted-foreground">Currently available</p>
+              </CardContent>
+            </Card>
+            <Card className="shadow-md">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Pending Orders</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analytics?.ordersByStatus?.pending || 0}</div>
+                <p className="text-xs text-muted-foreground">Needs attention</p>
+              </CardContent>
+            </Card>
+          </div>
 
-  function renderDialog() {
-    return (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <Card className="col-span-1 shadow-sm">
+              <CardHeader>
+                <CardTitle>Top 5 Popular Drinks</CardTitle>
+              </CardHeader>
+              <CardContent className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData}>
+                    <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
+                    <YAxis fontSize={12} tickLine={false} axisLine={false} />
+                    <Tooltip 
+                      cursor={{ fill: 'transparent' }}
+                      contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                    />
+                    <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                      {chartData.map((_entry, index) => (
+                        <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <Card className="col-span-1 overflow-hidden shadow-sm">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Menu Overview</CardTitle>
+                <Button onClick={() => setLocation("/admin/menu")} variant="outline" size="sm">
+                  Manage Menu
+                </Button>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="max-h-[300px] overflow-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {drinks?.slice(0, 5).map((drink) => (
+                        <TableRow key={drink.id}>
+                          <TableCell className="font-medium">{drink.name}</TableCell>
+                          <TableCell>
+                            {drink.isAvailable ? (
+                              <span className="text-xs text-green-600">Available</span>
+                            ) : (
+                              <span className="text-xs text-red-600">Unavailable</span>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </>
+      )}
+
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent>
           <DialogHeader>
@@ -190,7 +285,7 @@ export default function AdminDashboard() {
                 id="available" 
                 checked={formData.isAvailable}
                 onChange={(e) => setFormData({...formData, isAvailable: e.target.checked})}
-                className="rounded border-gray-300"
+                className="rounded border-gray-300 h-4 w-4"
               />
               <Label htmlFor="available">Available for ordering</Label>
             </div>
@@ -201,121 +296,6 @@ export default function AdminDashboard() {
           </div>
         </DialogContent>
       </Dialog>
-    );
-  }
-
-  return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="text-3xl font-display font-bold">Admin Dashboard</h2>
-        <p className="text-muted-foreground">Overview of system performance and menu management</p>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
-            <Coffee className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{analytics?.totalOrders || 0}</div>
-            <p className="text-xs text-muted-foreground">+20% from last month</p>
-          </CardContent>
-        </Card>
-        <Card className="shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Menu Items</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{drinks?.length || 0}</div>
-            <p className="text-xs text-muted-foreground">Currently available</p>
-          </CardContent>
-        </Card>
-        <Card className="shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Orders</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{analytics?.ordersByStatus?.pending || 0}</div>
-            <p className="text-xs text-muted-foreground">Needs attention</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Popular Drinks Chart */}
-        <Card className="col-span-1">
-          <CardHeader>
-            <CardTitle>Top 5 Popular Drinks</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData}>
-                <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis fontSize={12} tickLine={false} axisLine={false} />
-                <Tooltip 
-                  cursor={{ fill: 'transparent' }}
-                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                />
-                <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Menu Management */}
-        <Card className="col-span-1 overflow-hidden">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Menu Management</CardTitle>
-            <Button onClick={startCreate} size="sm" className="gap-2">
-              <Plus size={16} /> Add Drink
-            </Button>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="max-h-[300px] overflow-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {drinks?.map((drink) => (
-                    <TableRow key={drink.id}>
-                      <TableCell className="font-medium">
-                        {drink.name}
-                        {!drink.isAvailable && (
-                          <span className="ml-2 text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded-full">Unavailable</span>
-                        )}
-                      </TableCell>
-                      <TableCell>{drink.category}</TableCell>
-                      <TableCell className="text-right space-x-2">
-                        <Button variant="ghost" size="icon" onClick={() => startEdit(drink)}>
-                          <Edit2 size={16} />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => deleteDrink(drink.id)}>
-                          <Trash2 size={16} />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {renderDialog()}
     </div>
   );
 }
