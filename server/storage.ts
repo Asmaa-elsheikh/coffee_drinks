@@ -20,6 +20,8 @@ export interface IStorage {
   getOrder(id: number): Promise<Order | undefined>;
   createOrder(order: InsertOrder): Promise<Order>;
   updateOrderStatus(id: number, status: string, rejectionReason?: string): Promise<Order>;
+  getPopularDrinks(): Promise<{ name: string, count: number }[]>;
+  getOrderStats(): Promise<Record<string, number>>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -84,6 +86,36 @@ export class DatabaseStorage implements IStorage {
   async getOrder(id: number): Promise<Order | undefined> {
     const [order] = await db.select().from(orders).where(eq(orders.id, id));
     return order;
+  }
+
+  async getPopularDrinks(): Promise<{ name: string, count: number }[]> {
+    const result = await db
+      .select({
+        name: drinks.name,
+        count: sql<number>`count(${orders.id})`.mapWith(Number),
+      })
+      .from(orders)
+      .innerJoin(drinks, eq(orders.drinkId, drinks.id))
+      .groupBy(drinks.name)
+      .orderBy(desc(sql`count(${orders.id})`))
+      .limit(5);
+    return result;
+  }
+
+  async getOrderStats(): Promise<Record<string, number>> {
+    const result = await db
+      .select({
+        status: orders.status,
+        count: sql<number>`count(${orders.id})`.mapWith(Number),
+      })
+      .from(orders)
+      .groupBy(orders.status);
+    
+    const stats: Record<string, number> = {};
+    result.forEach(row => {
+      stats[row.status] = row.count;
+    });
+    return stats;
   }
 
   async createOrder(order: InsertOrder): Promise<Order> {

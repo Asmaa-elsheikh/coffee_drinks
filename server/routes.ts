@@ -161,19 +161,14 @@ export async function registerRoutes(
 
   // Analytics
   app.get(api.analytics.stats.path, requireAuth, async (req, res) => {
-    // Simple mock stats for MVP
-    const orders = await storage.getOrders();
+    const ordersData = await storage.getOrders();
+    const popularDrinks = await storage.getPopularDrinks();
+    const orderStats = await storage.getOrderStats();
+
     const stats = {
-      totalOrders: orders.length,
-      ordersByStatus: orders.reduce((acc: any, o) => {
-        acc[o.status] = (acc[o.status] || 0) + 1;
-        return acc;
-      }, {}),
-      popularDrinks: [
-        { name: "Coffee", count: 120 },
-        { name: "Tea", count: 85 },
-        { name: "Water", count: 40 }
-      ]
+      totalOrders: ordersData.length,
+      ordersByStatus: orderStats,
+      popularDrinks: popularDrinks
     };
     res.json(stats);
   });
