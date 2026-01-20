@@ -18,6 +18,7 @@ export const drinks = pgTable("drinks", {
   description: text("description"),
   preparationTime: integer("preparation_time").default(5), // in minutes
   isAvailable: boolean("is_available").default(true).notNull(),
+  deleted: boolean("deleted").default(false).notNull(),
 });
 
 export const orders = pgTable("orders", {

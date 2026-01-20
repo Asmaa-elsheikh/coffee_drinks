@@ -41,7 +41,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDrinks(): Promise<Drink[]> {
-    return await db.select().from(drinks).orderBy(drinks.name);
+    return await db.select().from(drinks).where(eq(drinks.deleted, false)).orderBy(drinks.name);
   }
 
   async getDrink(id: number): Promise<Drink | undefined> {
@@ -60,7 +60,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteDrink(id: number): Promise<void> {
-    await db.delete(drinks).where(eq(drinks.id, id));
+    await db.update(drinks).set({ deleted: true }).where(eq(drinks.id, id));
   }
 
   async getOrders(filters?: { status?: string, userId?: number }): Promise<(Order & { drink: Drink, user: User })[]> {
