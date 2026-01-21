@@ -41,7 +41,7 @@ export default function AdminHistory() {
     b.date.localeCompare(a.date) || a.employeeName.localeCompare(b.employeeName)
   );
 
-  const exportToCSV = () => {
+  const exportToExcel = () => {
     if (historyRows.length === 0) return;
 
     const headers = ["Date", "Employee", "Drinks Ordered", "Total Count"];
@@ -51,7 +51,6 @@ export default function AdminHistory() {
         const drinksSummary = Object.entries(row.drinks as Record<string, number>)
           .map(([name, count]) => `${name} (x${count})`)
           .join("; ");
-        // Escape quotes and ensure clean CSV formatting
         const cleanEmployeeName = row.employeeName.replace(/"/g, '""');
         const cleanDrinksSummary = drinksSummary.replace(/"/g, '""');
         return `"${row.date}","${cleanEmployeeName}","${cleanDrinksSummary}",${row.totalCount}`;
@@ -61,7 +60,6 @@ export default function AdminHistory() {
     const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     
-    // Use a direct download approach that works better in iframe environments
     const link = document.createElement("a");
     link.href = url;
     link.setAttribute("download", `drink_history_${format(new Date(), "yyyy-MM-dd")}.csv`);
@@ -69,7 +67,6 @@ export default function AdminHistory() {
     document.body.appendChild(link);
     link.click();
     
-    // Cleanup
     setTimeout(() => {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
@@ -86,8 +83,8 @@ export default function AdminHistory() {
           </h2>
           <p className="text-muted-foreground">Review aggregated drink requests by employee and day</p>
         </div>
-        <Button onClick={exportToCSV} disabled={historyRows.length === 0} className="gap-2">
-          <Download size={16} /> Export CSV
+        <Button onClick={exportToExcel} disabled={historyRows.length === 0} className="gap-2">
+          <Download size={16} /> Export Excel
         </Button>
       </div>
 
