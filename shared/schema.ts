@@ -5,7 +5,8 @@ import { relations } from "drizzle-orm";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(), // Acts as Employee ID
+  username: text("username").notNull().unique(), // Acts as a unique identifier/Employee ID
+  email: text("email").notNull().unique(),
   password: text("password").notNull(),
   role: text("role", { enum: ["employee", "kitchen", "admin"] }).default("employee").notNull(),
   name: text("name").notNull(),
@@ -66,7 +67,7 @@ export const insertOrderSchema = createInsertSchema(orders).omit({
   status: true 
 });
 
-// Types
+export const selectUserSchema = createInsertSchema(users);
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Drink = typeof drinks.$inferSelect;

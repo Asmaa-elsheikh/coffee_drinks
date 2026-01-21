@@ -31,10 +31,10 @@ export async function registerRoutes(
   app.use(passport.initialize());
   app.use(passport.session());
 
-  passport.use(new LocalStrategy(async (username, password, done) => {
+  passport.use(new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
     try {
-      const user = await storage.getUserByUsername(username);
-      if (!user) return done(null, false, { message: "Incorrect username." });
+      const user = await storage.getUserByEmail(email);
+      if (!user) return done(null, false, { message: "Incorrect email." });
       // In a real app, use bcrypt.compare here. 
       // For this MVP/demo without extra deps, we'll do simple comparison 
       // or assume passwords are plain text if they start with "plain:".
@@ -90,6 +90,41 @@ export async function registerRoutes(
   app.get(api.drinks.list.path, requireAuth, async (req, res) => {
     const drinks = await storage.getDrinks();
     res.json(drinks);
+  });
+
+  // Employee Management Routes
+  app.get("/api/admin/employees", requireAuth, async (req, res) => {
+    const user = req.user as any;
+    if (user.role !== "admin") return res.sendStatus(403);
+    const employees = await storage.getUsersByRole("employee");
+    res.json(employees);
+  });
+
+  app.post("/api/admin/employees", requireAuth, async (req, res) => {
+    const user = req.user as any;
+    if (user.role !== "admin") return res.sendStatus(403);
+    const employee = await storage.createUser({
+      ...req.body,
+      role: "employee",
+      username: req.body.email.split('@')[0] // temporary username
+    });
+    res.status(201).json(employee);
+  });
+
+  app.patch("/api/admin/employees/:id", requireAuth, async (req, res) => {
+    const user = req.user as any;
+    if (user.role !== "admin") return res.sendStatus(403);
+    const id = parseInt(req.params.id);
+    const updated = await storage.updateUser(id, req.body);
+    res.json(updated);
+  });
+
+  app.delete("/api/admin/employees/:id", requireAuth, async (req, res) => {
+    const user = req.user as any;
+    if (user.role !== "admin") return res.sendStatus(403);
+    const id = parseInt(req.params.id);
+    await storage.deleteUser(id);
+    res.sendStatus(204);
   });
 
   app.post(api.drinks.create.path, requireAuth, async (req, res) => {
@@ -185,18 +220,21 @@ async function seed() {
     // Create Users
     await storage.createUser({ 
       username: "admin", 
+      email: "admin@company.com",
       password: "password123", 
       role: "admin",
       name: "System Admin"
     });
     await storage.createUser({ 
       username: "kitchen", 
+      email: "kitchen@company.com",
       password: "password123", 
       role: "kitchen",
       name: "Kitchen Staff"
     });
     await storage.createUser({ 
       username: "employee1", 
+      email: "employee1@company.com",
       password: "password123", 
       role: "employee",
       name: "John Doe"

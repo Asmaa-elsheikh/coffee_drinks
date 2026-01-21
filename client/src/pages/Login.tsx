@@ -8,13 +8,13 @@ import { Coffee, Loader2 } from "lucide-react";
 import { Layout } from "@/components/Layout";
 
 export default function Login() {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { login, isLoggingIn } = useAuth();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    login({ username, password });
+    login({ email, password });
   };
 
   return (
@@ -33,13 +33,14 @@ export default function Login() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="username">Employee ID / Username</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input 
-                  id="username" 
-                  value={username} 
-                  onChange={(e) => setUsername(e.target.value)}
+                  id="email" 
+                  type="email"
+                  value={email} 
+                  onChange={(e) => setEmail(e.target.value)}
                   className="rounded-xl"
-                  placeholder="e.g. emp123"
+                  placeholder="employee@company.com"
                   required
                 />
               </div>
@@ -64,15 +65,15 @@ export default function Login() {
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <p className="text-muted-foreground">Employee:</p>
-                    <p className="font-mono">employee1 / password123</p>
+                    <p className="font-mono">employee1@company.com / password123</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Kitchen:</p>
-                    <p className="font-mono">kitchen / password123</p>
+                    <p className="font-mono">kitchen@company.com / password123</p>
                   </div>
                   <div className="col-span-2 pt-1 border-t border-border/50">
                     <p className="text-muted-foreground">Admin:</p>
-                    <p className="font-mono">admin / password123</p>
+                    <p className="font-mono">admin@company.com / password123</p>
                   </div>
                 </div>
                 <p className="pt-2 text-[10px] text-muted-foreground italic">* Role-based portals: Admin manages menu, Kitchen handles queue, Employee orders.</p>

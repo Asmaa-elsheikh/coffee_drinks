@@ -12,6 +12,7 @@ import EmployeeMenu from "@/pages/EmployeeMenu";
 import KitchenDashboard from "@/pages/KitchenDashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminHistory from "@/pages/AdminHistory";
+import AdminEmployees from "@/pages/AdminEmployees";
 import NotFound from "@/pages/not-found";
 
 // Protected Route Wrapper
@@ -88,6 +89,10 @@ function Router() {
 
       <Route path="/admin/history">
         {() => <ProtectedRoute component={AdminHistory} allowedRoles={["admin"]} />}
+      </Route>
+
+      <Route path="/admin/employees">
+        {() => <ProtectedRoute component={AdminEmployees} allowedRoles={["admin"]} />}
       </Route>
 
       <Route component={NotFound} />

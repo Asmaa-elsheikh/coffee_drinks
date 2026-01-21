@@ -7,7 +7,8 @@ import {
   LayoutDashboard, 
   ChefHat, 
   ClipboardList,
-  UserCircle
+  UserCircle,
+  Users
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -27,6 +28,7 @@ export function Layout({ children, showNav = true }: LayoutProps) {
       return [
         { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
         { href: "/admin/menu", label: "Menu Management", icon: Coffee },
+        { href: "/admin/employees", label: "Employee Management", icon: Users },
         { href: "/admin/history", label: "History", icon: ClipboardList },
       ];
     }
