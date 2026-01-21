@@ -17,8 +17,7 @@ export default function AdminHistory() {
     return null;
   }
 
-  // Aggregate orders by employee and date
-  const aggregatedData = orders?.reduce((acc: any, order) => {
+  const aggregatedData = orders?.reduce((acc: Record<string, any>, order) => {
     const date = format(new Date(order.createdAt), "yyyy-MM-dd");
     const employeeName = order.user.name;
     const drinkName = order.drink.name;
@@ -28,7 +27,7 @@ export default function AdminHistory() {
       acc[key] = {
         date,
         employeeName,
-        drinks: {},
+        drinks: {} as Record<string, number>,
         totalCount: 0
       };
     }
@@ -38,7 +37,7 @@ export default function AdminHistory() {
     return acc;
   }, {});
 
-  const historyRows = Object.values(aggregatedData || {}).sort((a: any, b: any) => 
+  const historyRows: any[] = Object.values(aggregatedData || {}).sort((a: any, b: any) => 
     b.date.localeCompare(a.date) || a.employeeName.localeCompare(b.employeeName)
   );
 
@@ -112,7 +111,7 @@ export default function AdminHistory() {
                   <TableCell>{row.employeeName}</TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
-                      {Object.entries(row.drinks).map(([name, count]) => (
+                      {Object.entries(row.drinks as Record<string, number>).map(([name, count]) => (
                         <span key={name} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
                           {name} x{count}
                         </span>
