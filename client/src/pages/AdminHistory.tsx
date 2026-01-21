@@ -51,19 +51,29 @@ export default function AdminHistory() {
         const drinksSummary = Object.entries(row.drinks as Record<string, number>)
           .map(([name, count]) => `${name} (x${count})`)
           .join("; ");
-        return `"${row.date}","${row.employeeName}","${drinksSummary}",${row.totalCount}`;
+        // Escape quotes and ensure clean CSV formatting
+        const cleanEmployeeName = row.employeeName.replace(/"/g, '""');
+        const cleanDrinksSummary = drinksSummary.replace(/"/g, '""');
+        return `"${row.date}","${cleanEmployeeName}","${cleanDrinksSummary}",${row.totalCount}`;
       })
-    ].join("\n");
+    ].join("\r\n");
 
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
+    const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
+    
+    // Use a direct download approach that works better in iframe environments
+    const link = document.createElement("a");
+    link.href = url;
     link.setAttribute("download", `drink_history_${format(new Date(), "yyyy-MM-dd")}.csv`);
-    link.style.visibility = "hidden";
+    link.style.display = 'none';
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    
+    // Cleanup
+    setTimeout(() => {
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }, 100);
   };
 
   return (
