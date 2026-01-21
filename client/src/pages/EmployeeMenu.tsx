@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { format } from "date-fns";
 
@@ -13,14 +14,11 @@ export default function EmployeeMenu() {
   const [location, setLocation] = useLocation();
   const { drinks, isLoading: isLoadingDrinks } = useDrinks();
   const { user } = useAuth();
-  const { createOrder, isCreating } = useOrders();
-  const isHistoryTab = location === "/history";
-  
-  const ordersResult = useOrders(
+  const { orders: recentOrders, createOrder, updateStatus, isCreating } = useOrders(
     { userId: String(user?.id) }, 
     10000
   );
-  const recentOrders = ordersResult.orders;
+  const isHistoryTab = location === "/history";
 
   if (!user) {
     setLocation("/login");
@@ -104,8 +102,14 @@ export default function EmployeeMenu() {
             </p>
           </div>
           {activeOrder.status === "ready" && (
-            <div className="sm:text-right w-full sm:w-auto p-2 bg-accent/10 sm:bg-transparent rounded-lg border sm:border-0 border-accent/20">
-              <p className="text-accent font-bold">Ready for Pickup!</p>
+            <div className="flex flex-col items-end gap-2 w-full sm:w-auto">
+              <Button 
+                onClick={() => updateStatus({ id: activeOrder.id, status: "completed" })}
+                className="bg-green-600 hover:bg-green-700 text-white gap-2 w-full sm:w-auto"
+                data-testid="button-receive-drink"
+              >
+                Noted, receiving now
+              </Button>
               <p className="text-[10px] md:text-xs text-muted-foreground">Don't let it get cold.</p>
             </div>
           )}
