@@ -48,7 +48,7 @@ export default function AdminHistory() {
     const csvContent = [
       headers.join(","),
       ...historyRows.map((row: any) => {
-        const drinksSummary = Object.entries(row.drinks)
+        const drinksSummary = Object.entries(row.drinks as Record<string, number>)
           .map(([name, count]) => `${name} (x${count})`)
           .join("; ");
         return `"${row.date}","${row.employeeName}","${drinksSummary}",${row.totalCount}`;
