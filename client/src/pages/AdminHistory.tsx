@@ -12,12 +12,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 export default function AdminHistory() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
-  const { orders, isLoading } = useOrders({ status: "completed" });
+  const { orders, isLoading } = useOrders({});
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), "yyyy-MM"));
 
   if (!user || user.role !== "admin") {
     if (user && user.role !== "admin") setLocation("/");
     return null;
+  }
+
+  // Debugging: Ensure we see what data is coming in
+  if (orders) {
+    console.log("Total orders fetched:", orders.length);
+    console.log("First order date:", orders[0]?.createdAt);
   }
 
   // Generate last 12 months for the filter
@@ -29,9 +35,9 @@ export default function AdminHistory() {
 
   const filteredOrders = orders?.filter(order => {
     const orderDate = new Date(order.createdAt);
-    // Use UTC date parts to avoid timezone shifts causing month mismatches
-    const year = orderDate.getUTCFullYear();
-    const month = String(orderDate.getUTCMonth() + 1).padStart(2, '0');
+    // Use local time for filtering to match what users see
+    const year = orderDate.getFullYear();
+    const month = String(orderDate.getMonth() + 1).padStart(2, '0');
     const orderMonth = `${year}-${month}`;
     return orderMonth === selectedMonth;
   });
