@@ -59,25 +59,6 @@ export default function Login() {
                 {isLoggingIn ? <Loader2 className="animate-spin mr-2" /> : null}
                 Sign In
               </Button>
-              
-              <div className="bg-muted/50 p-4 rounded-xl text-xs space-y-2 border border-border mt-4">
-                <p className="font-semibold text-foreground uppercase tracking-wider">Demo Credentials:</p>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <p className="text-muted-foreground">Employee:</p>
-                    <p className="font-mono">employee1@company.com / password123</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Kitchen:</p>
-                    <p className="font-mono">kitchen@company.com / password123</p>
-                  </div>
-                  <div className="col-span-2 pt-1 border-t border-border/50">
-                    <p className="text-muted-foreground">Admin:</p>
-                    <p className="font-mono">admin@company.com / password123</p>
-                  </div>
-                </div>
-                <p className="pt-2 text-[10px] text-muted-foreground italic">* Role-based portals: Admin manages menu, Kitchen handles queue, Employee orders.</p>
-              </div>
             </form>
           </CardContent>
         </Card>
