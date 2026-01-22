@@ -8,6 +8,8 @@ import { Strategy as LocalStrategy } from "passport-local";
 import session from "express-session";
 import createMemoryStore from "memorystore";
 
+import bcrypt from "bcrypt";
+
 const MemoryStore = createMemoryStore(session);
 
 export async function registerRoutes(
@@ -35,13 +37,9 @@ export async function registerRoutes(
     try {
       const user = await storage.getUserByEmail(email);
       if (!user) return done(null, false, { message: "Incorrect email." });
-      // In a real app, use bcrypt.compare here. 
-      // For this MVP/demo without extra deps, we'll do simple comparison 
-      // or assume passwords are plain text if they start with "plain:".
-      // BUT for security in production we should use bcrypt. 
-      // Since 'bcrypt' isn't in the default package list and I must use installed packages,
-      // I will implement a simple check.
-      if (user.password !== password) {
+      
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
         return done(null, false, { message: "Incorrect password." });
       }
       return done(null, user);

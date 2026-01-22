@@ -1,6 +1,9 @@
 import { db } from "./db";
 import { users, drinks, orders, type User, type InsertUser, type Drink, type InsertDrink, type Order, type InsertOrder } from "@shared/schema";
 import { eq, desc, and, sql } from "drizzle-orm";
+import bcrypt from "bcrypt";
+
+const SALT_ROUNDS = 10;
 
 export interface IStorage {
   // Users
@@ -49,12 +52,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUser(user: InsertUser): Promise<User> {
-    const [newUser] = await db.insert(users).values(user).returning();
+    const hashedPassword = await bcrypt.hash(user.password, SALT_ROUNDS);
+    const [newUser] = await db.insert(users).values({ ...user, password: hashedPassword }).returning();
     return newUser;
   }
 
   async updateUser(id: number, updates: Partial<InsertUser>): Promise<User> {
-    const [updated] = await db.update(users).set(updates).where(eq(users.id, id)).returning();
+    const finalUpdates = { ...updates };
+    if (updates.password) {
+      finalUpdates.password = await bcrypt.hash(updates.password, SALT_ROUNDS);
+    }
+    const [updated] = await db.update(users).set(finalUpdates).where(eq(users.id, id)).returning();
     return updated;
   }
 
