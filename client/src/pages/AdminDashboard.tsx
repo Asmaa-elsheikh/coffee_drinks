@@ -93,7 +93,7 @@ export default function AdminDashboard() {
   const renderDialog = () => {
     return (
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingDrink ? "Edit Drink" : "Add New Drink"}</DialogTitle>
           </DialogHeader>
@@ -126,16 +126,16 @@ export default function AdminDashboard() {
               <Label htmlFor="image">Drink Image</Label>
               <div className="flex flex-col gap-2">
                 {formData.imageUrl && (
-                  <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-border">
+                  <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-border bg-muted">
                     <img 
                       src={formData.imageUrl} 
                       alt="Preview" 
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                     />
                     <Button 
                       variant="destructive" 
                       size="icon" 
-                      className="absolute top-2 right-2 h-8 w-8"
+                      className="absolute top-2 right-2 h-8 w-8 shadow-md"
                       onClick={() => setFormData({...formData, imageUrl: ""})}
                     >
                       <Trash2 size={14} />
@@ -181,7 +181,7 @@ export default function AdminDashboard() {
               <Label htmlFor="available">Available for ordering</Label>
             </div>
           </div>
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-2 pt-4 border-t sticky bottom-0 bg-background pb-2">
             <Button variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>
             <Button onClick={handleSave}>{editingDrink ? "Save Changes" : "Create Drink"}</Button>
           </div>
