@@ -52,6 +52,7 @@ export default function AdminDashboard() {
       name: "",
       category: "Coffee",
       description: "",
+      imageUrl: "",
       preparationTime: "5",
       isAvailable: true
     });

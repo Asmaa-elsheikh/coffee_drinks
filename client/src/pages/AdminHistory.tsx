@@ -3,21 +3,36 @@ import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { format } from "date-fns";
-import { Download, History, Loader2 } from "lucide-react";
+import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
+import { Download, History, Loader2, Calendar } from "lucide-react";
 import { useLocation } from "wouter";
+import { useState } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function AdminHistory() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const { orders, isLoading } = useOrders({ status: "completed" });
+  const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), "yyyy-MM"));
 
   if (!user || user.role !== "admin") {
     if (user && user.role !== "admin") setLocation("/");
     return null;
   }
 
-  const aggregatedData = orders?.reduce((acc: Record<string, any>, order) => {
+  // Generate last 12 months for the filter
+  const months = Array.from({ length: 12 }, (_, i) => {
+    const d = new Date();
+    d.setMonth(d.getMonth() - i);
+    return format(d, "yyyy-MM");
+  });
+
+  const filteredOrders = orders?.filter(order => {
+    const orderDate = new Date(order.createdAt);
+    return format(orderDate, "yyyy-MM") === selectedMonth;
+  });
+
+  const aggregatedData = filteredOrders?.reduce((acc: Record<string, any>, order) => {
     const date = format(new Date(order.createdAt), "yyyy-MM-dd");
     const employeeName = order.user.name;
     const drinkName = order.drink.name;
@@ -62,7 +77,7 @@ export default function AdminHistory() {
     
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", `drink_history_${format(new Date(), "yyyy-MM-dd")}.csv`);
+    link.setAttribute("download", `drink_history_${selectedMonth}.csv`);
     link.style.display = 'none';
     document.body.appendChild(link);
     link.click();
@@ -83,9 +98,26 @@ export default function AdminHistory() {
           </h2>
           <p className="text-muted-foreground">Review aggregated drink requests by employee and day</p>
         </div>
-        <Button onClick={exportToExcel} disabled={historyRows.length === 0} className="gap-2">
-          <Download size={16} /> Export Excel
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex items-center gap-2">
+            <Calendar size={18} className="text-muted-foreground" />
+            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+              <SelectTrigger className="w-[180px] rounded-xl">
+                <SelectValue placeholder="Select Month" />
+              </SelectTrigger>
+              <SelectContent>
+                {months.map(m => (
+                  <SelectItem key={m} value={m}>
+                    {format(parseISO(`${m}-01`), "MMMM yyyy")}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button onClick={exportToExcel} disabled={historyRows.length === 0} className="gap-2 rounded-xl">
+            <Download size={16} /> Export CSV
+          </Button>
+        </div>
       </div>
 
       <Card className="rounded-2xl overflow-hidden border-border/50 shadow-sm">
