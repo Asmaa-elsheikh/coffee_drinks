@@ -123,13 +123,43 @@ export default function AdminDashboard() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="imageUrl">Image URL</Label>
-              <Input 
-                id="imageUrl" 
-                value={formData.imageUrl} 
-                onChange={(e) => setFormData({...formData, imageUrl: e.target.value})} 
-                placeholder="https://images.unsplash.com/..."
-              />
+              <Label htmlFor="image">Drink Image</Label>
+              <div className="flex flex-col gap-2">
+                {formData.imageUrl && (
+                  <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-border">
+                    <img 
+                      src={formData.imageUrl} 
+                      alt="Preview" 
+                      className="w-full h-full object-cover"
+                    />
+                    <Button 
+                      variant="destructive" 
+                      size="icon" 
+                      className="absolute top-2 right-2 h-8 w-8"
+                      onClick={() => setFormData({...formData, imageUrl: ""})}
+                    >
+                      <Trash2 size={14} />
+                    </Button>
+                  </div>
+                )}
+                <Input 
+                  id="image" 
+                  type="file" 
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setFormData({...formData, imageUrl: reader.result as string});
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  className="cursor-pointer"
+                />
+                <p className="text-xs text-muted-foreground">Upload an image from your device</p>
+              </div>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="prepTime">Preparation Time (mins)</Label>

@@ -36,10 +36,16 @@ export function DrinkCard({ drink, onOrder, isOrdering }: DrinkCardProps) {
               src={drink.imageUrl} 
               alt={drink.name}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              onError={(e) => {
+                // Fallback if image fails to load
+                (e.target as HTMLImageElement).src = "";
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
             />
           ) : (
             <Coffee size={64} strokeWidth={1} />
           )}
+          {!drink.imageUrl && <Coffee size={64} strokeWidth={1} />}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
             <span className="text-white font-medium">{drink.category}</span>
           </div>
