@@ -25,6 +25,7 @@ export default function AdminDashboard() {
     name: "",
     category: "Coffee",
     description: "",
+    imageUrl: "",
     preparationTime: "5",
     isAvailable: true
   });
@@ -62,6 +63,7 @@ export default function AdminDashboard() {
       name: drink.name,
       category: drink.category,
       description: drink.description || "",
+      imageUrl: drink.imageUrl || "",
       preparationTime: String(drink.preparationTime),
       isAvailable: drink.isAvailable
     });
@@ -74,6 +76,7 @@ export default function AdminDashboard() {
       name: "",
       category: "Coffee",
       description: "",
+      imageUrl: "",
       preparationTime: "5",
       isAvailable: true
     });
@@ -116,6 +119,15 @@ export default function AdminDashboard() {
                 id="description" 
                 value={formData.description} 
                 onChange={(e) => setFormData({...formData, description: e.target.value})} 
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="imageUrl">Image URL</Label>
+              <Input 
+                id="imageUrl" 
+                value={formData.imageUrl} 
+                onChange={(e) => setFormData({...formData, imageUrl: e.target.value})} 
+                placeholder="https://images.unsplash.com/..."
               />
             </div>
             <div className="grid gap-2">

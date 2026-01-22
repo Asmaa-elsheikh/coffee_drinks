@@ -240,12 +240,12 @@ async function seed() {
 
     // Create Drinks
     const drinksList = [
-      { name: "Tea", category: "Tea", preparationTime: 3, isAvailable: true, description: "Classic hot tea" },
-      { name: "Turkish Coffee", category: "Coffee", preparationTime: 5, isAvailable: true, description: "Traditional Turkish coffee" },
-      { name: "French Coffee", category: "Coffee", preparationTime: 5, isAvailable: true, description: "Smooth French press coffee" },
-      { name: "Nescafe", category: "Coffee", preparationTime: 2, isAvailable: true, description: "Quick instant coffee" },
-      { name: "Espresso", category: "Coffee", preparationTime: 2, isAvailable: true, description: "Strong single shot" },
-      { name: "Herbs", category: "Tea", preparationTime: 4, isAvailable: true, description: "Assorted herbal infusion" }
+      { name: "Tea", imageUrl: "https://images.unsplash.com/photo-1594631252845-29fc45865157?w=800&q=80", category: "Tea", preparationTime: 3, isAvailable: true, description: "Classic hot tea" },
+      { name: "Turkish Coffee", imageUrl: "https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=800&q=80", category: "Coffee", preparationTime: 5, isAvailable: true, description: "Traditional Turkish coffee" },
+      { name: "French Coffee", imageUrl: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&q=80", category: "Coffee", preparationTime: 5, isAvailable: true, description: "Smooth French press coffee" },
+      { name: "Nescafe", imageUrl: "https://images.unsplash.com/photo-1541167760496-1628856ab752?w=800&q=80", category: "Coffee", preparationTime: 2, isAvailable: true, description: "Quick instant coffee" },
+      { name: "Espresso", imageUrl: "https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=800&q=80", category: "Coffee", preparationTime: 2, isAvailable: true, description: "Strong single shot" },
+      { name: "Herbs", imageUrl: "https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=800&q=80", category: "Tea", preparationTime: 4, isAvailable: true, description: "Assorted herbal infusion" }
     ];
 
     for (const drink of drinksList) {
