@@ -31,8 +31,15 @@ export function DrinkCard({ drink, onOrder, isOrdering }: DrinkCardProps) {
     <>
       <div className="group bg-card rounded-2xl border border-border/50 hover:border-primary/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full">
         <div className="aspect-[4/3] bg-muted relative overflow-hidden flex items-center justify-center text-muted-foreground/30">
-          {/* In a real app, map drink.name to specific images. Using a placeholder pattern here. */}
-          <Coffee size={64} strokeWidth={1} />
+          {drink.imageUrl ? (
+            <img 
+              src={drink.imageUrl} 
+              alt={drink.name}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            />
+          ) : (
+            <Coffee size={64} strokeWidth={1} />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
             <span className="text-white font-medium">{drink.category}</span>
           </div>
