@@ -29,7 +29,11 @@ export default function AdminHistory() {
 
   const filteredOrders = orders?.filter(order => {
     const orderDate = new Date(order.createdAt);
-    return format(orderDate, "yyyy-MM") === selectedMonth;
+    // Use UTC date parts to avoid timezone shifts causing month mismatches
+    const year = orderDate.getUTCFullYear();
+    const month = String(orderDate.getUTCMonth() + 1).padStart(2, '0');
+    const orderMonth = `${year}-${month}`;
+    return orderMonth === selectedMonth;
   });
 
   const aggregatedData = filteredOrders?.reduce((acc: Record<string, any>, order) => {
