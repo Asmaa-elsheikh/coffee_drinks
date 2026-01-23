@@ -69,33 +69,37 @@ export default function AdminHistory() {
   const exportToExcel = () => {
     if (historyRows.length === 0) return;
 
-    const headers = ["Date", "Employee", "Drinks Ordered", "Total Count"];
-    const csvContent = [
-      headers.join(","),
-      ...historyRows.map((row: any) => {
-        const drinksSummary = Object.entries(row.drinks as Record<string, number>)
-          .map(([name, count]) => `${name} (x${count})`)
-          .join("; ");
-        const cleanEmployeeName = row.employeeName.replace(/"/g, '""');
-        const cleanDrinksSummary = drinksSummary.replace(/"/g, '""');
-        return `"${row.date}","${cleanEmployeeName}","${cleanDrinksSummary}",${row.totalCount}`;
-      })
-    ].join("\r\n");
+    try {
+      const headers = ["Date", "Employee", "Drinks Ordered", "Total Count"];
+      const csvContent = [
+        headers.join(","),
+        ...historyRows.map((row: any) => {
+          const drinksSummary = Object.entries(row.drinks as Record<string, number>)
+            .map(([name, count]) => `${name} (x${count})`)
+            .join("; ");
+          const cleanEmployeeName = (row.employeeName || "").toString().replace(/"/g, '""');
+          const cleanDrinksSummary = drinksSummary.replace(/"/g, '""');
+          return `"${row.date}","${cleanEmployeeName}","${cleanDrinksSummary}",${row.totalCount}`;
+        })
+      ].join("\n");
 
-    const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `drink_history_${selectedMonth}.csv`);
-    link.style.display = 'none';
-    document.body.appendChild(link);
-    link.click();
-    
-    setTimeout(() => {
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    }, 100);
+      const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `drink_history_${selectedMonth}.csv`;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 100);
+    } catch (error) {
+      console.error("Export failed:", error);
+    }
   };
 
   return (
