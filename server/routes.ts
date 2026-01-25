@@ -155,8 +155,13 @@ export async function registerRoutes(
     const user = req.user as any;
     const filters: any = {};
     
-    // Non-admin and non-kitchen users only see their own orders
-    if (user.role !== 'admin' && user.role !== 'kitchen') {
+    // DEMO ISOLATION: 
+    // If the user is a demo account, they should only see their own data.
+    // Demo accounts: admin@company.com, kitchen@company.com, employee1@company.com
+    const demoEmails = ['admin@company.com', 'kitchen@company.com', 'employee1@company.com'];
+    const isDemoAccount = demoEmails.includes(user.email);
+
+    if (isDemoAccount || (user.role !== 'admin' && user.role !== 'kitchen')) {
       filters.userId = user.id;
     } else if (req.query.userId) {
       filters.userId = parseInt(req.query.userId as string);
