@@ -155,8 +155,8 @@ export async function registerRoutes(
     const user = req.user as any;
     const filters: any = {};
     
-    // Employees only see their own orders
-    if (user.role === 'employee') {
+    // Non-admin and non-kitchen users only see their own orders
+    if (user.role !== 'admin' && user.role !== 'kitchen') {
       filters.userId = user.id;
     } else if (req.query.userId) {
       filters.userId = parseInt(req.query.userId as string);
