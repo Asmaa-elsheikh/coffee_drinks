@@ -39,6 +39,12 @@ export default function AdminHistory() {
     const year = orderDate.getFullYear();
     const month = String(orderDate.getMonth() + 1).padStart(2, '0');
     const orderMonth = `${year}-${month}`;
+    
+    // Debug specific month
+    if (orderMonth === "2026-01") {
+      console.log("Found Jan 2026 order:", order.id, "User:", order.user.email);
+    }
+    
     return orderMonth === selectedMonth;
   });
 

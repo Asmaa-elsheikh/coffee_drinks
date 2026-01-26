@@ -161,7 +161,9 @@ export async function registerRoutes(
     const demoEmails = ['admin@company.com', 'kitchen@company.com', 'employee1@company.com'];
     const isDemoAccount = demoEmails.includes(user.email);
 
-    if (isDemoAccount || (user.role !== 'admin' && user.role !== 'kitchen')) {
+    // Only apply the user filter if it's a demo account OR an employee
+    // Real Admin (asmaa.ali@qara.net) should see EVERYTHING
+    if (isDemoAccount || user.role === 'employee') {
       filters.userId = user.id;
     } else if (req.query.userId) {
       filters.userId = parseInt(req.query.userId as string);
