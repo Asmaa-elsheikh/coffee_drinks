@@ -127,14 +127,18 @@ export async function registerRoutes(
 
   app.post(api.drinks.create.path, requireAuth, async (req, res) => {
     try {
+      const user = req.user as any;
+      if (user.role !== "admin") return res.sendStatus(403);
+      
       const input = api.drinks.create.input.parse(req.body);
       const drink = await storage.createDrink(input);
       res.status(201).json(drink);
     } catch (err) {
+      console.error("Error creating drink:", err);
       if (err instanceof z.ZodError) {
         return res.status(400).json({ message: err.errors[0].message });
       }
-      throw err;
+      res.status(500).json({ message: "Internal server error" });
     }
   });
 

@@ -38,6 +38,7 @@ export default function AdminDashboard() {
   const handleSave = () => {
     const payload = {
       ...formData,
+      imageUrl: formData.imageUrl || null,
       preparationTime: parseInt(formData.preparationTime) || 5
     };
     
