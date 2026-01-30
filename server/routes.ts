@@ -159,15 +159,13 @@ export async function registerRoutes(
     const user = req.user as any;
     const filters: any = {};
     
-    // DEMO ISOLATION: 
-    // If the user is a demo account, they should only see their own data.
-    // Demo accounts: admin@company.com, kitchen@company.com, employee1@company.com
+    // Admin (asmaa.ali@qara.net) and Kitchen see everything
+    // Demo accounts and regular employees see only their own
     const demoEmails = ['admin@company.com', 'kitchen@company.com', 'employee1@company.com'];
     const isDemoAccount = demoEmails.includes(user.email);
+    const isRealAdmin = user.email === 'asmaa.ali@qara.net';
 
-    // Only apply the user filter if it's a demo account OR an employee
-    // Real Admin (asmaa.ali@qara.net) should see EVERYTHING
-    if (isDemoAccount || user.role === 'employee') {
+    if (!isRealAdmin && user.role !== 'kitchen') {
       filters.userId = user.id;
     } else if (req.query.userId) {
       filters.userId = parseInt(req.query.userId as string);

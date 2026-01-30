@@ -89,12 +89,13 @@ export default function AdminHistory() {
         })
       ].join("\n");
 
+      // Ensure UTF-8 with BOM for Excel compatibility
       const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       
       const link = document.createElement("a");
       link.href = url;
-      link.download = `drink_history_${selectedMonth}.csv`;
+      link.setAttribute("download", `drink_history_${selectedMonth}.csv`);
       link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
