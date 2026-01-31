@@ -85,7 +85,7 @@ export async function registerRoutes(
   };
 
   // Drink Routes
-  app.get(api.drinks.list.path, requireAuth, async (req, res) => {
+  app.get(api.drinks.list.path, async (req, res) => {
     const drinks = await storage.getDrinks();
     res.json(drinks);
   });
