@@ -143,6 +143,9 @@ export async function registerRoutes(
   });
 
   app.patch(api.drinks.update.path, requireAuth, async (req, res) => {
+    const user = req.user as any;
+    if (user.role !== "admin" && user.email !== "admin@company.com") return res.sendStatus(403);
+    
     const id = parseInt(req.params.id as string);
     const input = api.drinks.update.input.parse(req.body);
     const updated = await storage.updateDrink(id, input);
@@ -150,6 +153,9 @@ export async function registerRoutes(
   });
 
   app.delete(api.drinks.delete.path, requireAuth, async (req, res) => {
+    const user = req.user as any;
+    if (user.role !== "admin" && user.email !== "admin@company.com") return res.sendStatus(403);
+    
     await storage.deleteDrink(parseInt(req.params.id as string));
     res.sendStatus(204);
   });
