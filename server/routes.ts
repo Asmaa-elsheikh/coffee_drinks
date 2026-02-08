@@ -165,13 +165,11 @@ export async function registerRoutes(
     const user = req.user as any;
     const filters: any = {};
     
-    // Admin (asmaa.ali@qara.net) and Kitchen see everything
-    // Demo accounts and regular employees see only their own
-    const demoEmails = ['admin@company.com', 'kitchen@company.com', 'employee1@company.com'];
-    const isDemoAccount = demoEmails.includes(user.email);
+    // Fix Admin History View
     const isRealAdmin = user.email === 'asmaa.ali@qara.net';
+    const isKitchen = user.role === 'kitchen';
 
-    if (!isRealAdmin && user.role !== 'kitchen') {
+    if (!isRealAdmin && !isKitchen) {
       filters.userId = user.id;
     } else if (req.query.userId) {
       filters.userId = parseInt(req.query.userId as string);
