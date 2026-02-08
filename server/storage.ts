@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { users, drinks, orders, type User, type InsertUser, type Drink, type InsertDrink, type Order, type InsertOrder } from "@shared/schema";
-import { eq, desc, and, sql } from "drizzle-orm";
+import { eq, desc, and, sql, inArray } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
 const SALT_ROUNDS = 10;
@@ -11,6 +11,7 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUsersByRole(role: string): Promise<User[]>;
+  getDemoUserIds(): Promise<number[]>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<InsertUser>): Promise<User>;
   deleteUser(id: number): Promise<void>;
@@ -49,6 +50,12 @@ export class DatabaseStorage implements IStorage {
 
   async getUsersByRole(role: string): Promise<User[]> {
     return await db.select().from(users).where(eq(users.role, role as any));
+  }
+
+  async getDemoUserIds(): Promise<number[]> {
+    const demoEmails = ['admin@company.com', 'kitchen@company.com', 'employee1@company.com'];
+    const usersList = await db.select().from(users).where(inArray(users.email, demoEmails));
+    return usersList.map(u => u.id);
   }
 
   async createUser(user: InsertUser): Promise<User> {
@@ -93,20 +100,21 @@ export class DatabaseStorage implements IStorage {
     await db.update(drinks).set({ deleted: true }).where(eq(drinks.id, id));
   }
 
-  async getOrders(filters?: { status?: string, userId?: number }): Promise<(Order & { drink: Drink, user: User })[]> {
+  async getOrders(filters?: { status?: string, userId?: number, userIds?: number[] }): Promise<(Order & { drink: Drink, user: User })[]> {
     const query = db.query.orders.findMany({
       with: {
         drink: true,
         user: true,
       },
       orderBy: desc(orders.createdAt),
-      where: (ordersTable, { eq, and }) => {
+      where: (ordersTable, { eq, and, inArray }) => {
         const conditions = [];
         if (filters?.status) {
           const statusList = filters.status.split(',') as any[];
           conditions.push(sql`${ordersTable.status} IN ${statusList}`);
         }
         if (filters?.userId) conditions.push(eq(ordersTable.userId, filters.userId));
+        if (filters?.userIds) conditions.push(inArray(ordersTable.userId, filters.userIds));
         return conditions.length ? and(...conditions) : undefined;
       },
     });

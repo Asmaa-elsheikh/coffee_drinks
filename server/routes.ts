@@ -165,14 +165,20 @@ export async function registerRoutes(
     const user = req.user as any;
     const filters: any = {};
     
-    // Fix Admin History View
+    // Fix History Views
     const isRealAdmin = user.email === 'asmaa.ali@qara.net';
     const isKitchen = user.role === 'kitchen';
+    const isDemoAdmin = user.email === 'admin@company.com';
 
-    if (!isRealAdmin && !isKitchen) {
+    if (isRealAdmin || isKitchen) {
+      // Real admin and kitchen see everything
+    } else if (isDemoAdmin) {
+      // Demo admin only sees demo accounts' orders
+      const demoUserIds = await storage.getDemoUserIds();
+      filters.userIds = demoUserIds;
+    } else {
+      // Regular users only see their own
       filters.userId = user.id;
-    } else if (req.query.userId) {
-      filters.userId = parseInt(req.query.userId as string);
     }
 
     if (req.query.status) {
