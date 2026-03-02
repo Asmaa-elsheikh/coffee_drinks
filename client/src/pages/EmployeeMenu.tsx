@@ -7,15 +7,24 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useLocation } from "wouter";
 import { format } from "date-fns";
+import { RotateCcw, XCircle } from "lucide-react";
 
 export default function EmployeeMenu() {
   const [location, setLocation] = useLocation();
   const { drinks, isLoading: isLoadingDrinks } = useDrinks();
   const { user } = useAuth();
   const { orders: recentOrders, createOrder, updateStatus, isCreating } = useOrders(
-    { userId: String(user?.id) }, 
+    { userId: String(user?.id) },
     10000
   );
   const isHistoryTab = location === "/history";
@@ -33,28 +42,68 @@ export default function EmployeeMenu() {
           <h2 className="text-3xl font-display font-bold">My Order History</h2>
           <p className="text-muted-foreground">Review your past drink requests</p>
         </div>
-        
+
         <Card className="rounded-2xl overflow-hidden border-border/50">
           <ScrollArea className="h-[calc(100vh-250px)]">
             <div className="p-0">
-              {recentOrders?.map((order) => (
-                <div key={order.id} className="flex items-center justify-between p-4 border-b last:border-0 hover:bg-muted/30 transition-colors">
-                  <div className="flex flex-col">
-                    <span className="font-medium">{order.drink.name}</span>
-                    <span className="text-xs text-muted-foreground">{format(new Date(order.createdAt), "MMM d, h:mm a")}</span>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    {order.sugar && order.sugar !== "None" && (
-                      <span className="text-xs px-2 py-1 bg-muted rounded-full text-muted-foreground hidden sm:inline-block">
-                        {order.sugar}
-                      </span>
-                    )}
-                    <StatusBadge status={order.status as any} />
-                  </div>
-                </div>
-              ))}
-              {(!recentOrders || recentOrders.length === 0) && (
+              {(!recentOrders || recentOrders.length === 0) ? (
                 <div className="p-8 text-center text-muted-foreground">No orders yet.</div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Drink Name</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Sugar</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="w-[120px] text-center"></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {recentOrders.map((order) => (
+                      <TableRow key={order.id}>
+                        <TableCell className="font-medium">{order.drink.name}</TableCell>
+                        <TableCell className="text-muted-foreground whitespace-nowrap">
+                          {format(new Date(order.createdAt), "MMM d, h:mm a")}
+                        </TableCell>
+                        <TableCell>{order.sugar || "None"}</TableCell>
+                        <TableCell>
+                          <StatusBadge status={order.status as any} />
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {order.status === "completed" && (
+                            <Button
+                              variant="default"
+                              size="sm"
+                              className="gap-2 rounded-xl bg-green-600 hover:bg-green-700 text-white shadow-sm border-0"
+                              disabled={isCreating}
+                              onClick={() => createOrder({
+                                drinkId: order.drinkId,
+                                userId: user.id,
+                                sugar: order.sugar || "None",
+                                notes: order.notes
+                              })}
+                            >
+                              <RotateCcw size={14} />
+                              Reorder
+                            </Button>
+                          )}
+                          {order.status === "pending" && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="gap-2 rounded-xl text-red-600 hover:text-red-700 hover:bg-red-50"
+                              onClick={() => updateStatus({ id: order.id, status: "cancelled" })}
+                            >
+                              <XCircle size={14} />
+                              Cancel
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               )}
             </div>
           </ScrollArea>
@@ -64,7 +113,7 @@ export default function EmployeeMenu() {
   }
 
   // Get only the absolute latest order to show status
-  const activeOrder = recentOrders?.find(o => 
+  const activeOrder = recentOrders?.find(o =>
     ["pending", "accepted", "in_preparation", "ready"].includes(o.status)
   );
 
@@ -103,7 +152,7 @@ export default function EmployeeMenu() {
           </div>
           {activeOrder.status === "ready" && (
             <div className="flex flex-col items-end gap-2 w-full sm:w-auto">
-              <Button 
+              <Button
                 onClick={() => updateStatus({ id: activeOrder.id, status: "completed" })}
                 className="bg-green-600 hover:bg-green-700 text-white gap-2 w-full sm:w-auto"
                 data-testid="button-receive-drink"
@@ -111,6 +160,19 @@ export default function EmployeeMenu() {
                 Noted, receiving now
               </Button>
               <p className="text-[10px] md:text-xs text-muted-foreground">Don't let it get cold.</p>
+            </div>
+          )}
+          {activeOrder.status === "pending" && (
+            <div className="flex flex-col items-end gap-2 w-full sm:w-auto">
+              <Button
+                onClick={() => updateStatus({ id: activeOrder.id, status: "cancelled" })}
+                variant="outline"
+                className="text-red-600 border-red-200 hover:bg-red-50 gap-2 w-full sm:w-auto shadow-sm"
+              >
+                <XCircle size={16} />
+                Cancel Order
+              </Button>
+              <p className="text-[10px] md:text-xs text-muted-foreground italic">Changed your mind?</p>
             </div>
           )}
         </div>
@@ -125,15 +187,15 @@ export default function EmployeeMenu() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
           {drinks?.map((drink) => (
-            <DrinkCard 
-              key={drink.id} 
-              drink={drink} 
+            <DrinkCard
+              key={drink.id}
+              drink={drink}
               isOrdering={isCreating}
               onOrder={(details) => createOrder({
                 drinkId: drink.id,
                 userId: user.id,
                 ...details
-              })} 
+              })}
             />
           ))}
         </div>
@@ -144,24 +206,64 @@ export default function EmployeeMenu() {
         <Card className="rounded-2xl overflow-hidden border-border/50">
           <ScrollArea className="h-[300px]">
             <div className="p-0">
-              {recentOrders?.map((order) => (
-                <div key={order.id} className="flex items-center justify-between p-4 border-b last:border-0 hover:bg-muted/30 transition-colors">
-                  <div className="flex flex-col">
-                    <span className="font-medium">{order.drink.name}</span>
-                    <span className="text-xs text-muted-foreground">{format(new Date(order.createdAt), "MMM d, h:mm a")}</span>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    {order.sugar && order.sugar !== "None" && (
-                      <span className="text-xs px-2 py-1 bg-muted rounded-full text-muted-foreground hidden sm:inline-block">
-                        {order.sugar}
-                      </span>
-                    )}
-                    <StatusBadge status={order.status as any} />
-                  </div>
-                </div>
-              ))}
-              {(!recentOrders || recentOrders.length === 0) && (
+              {(!recentOrders || recentOrders.length === 0) ? (
                 <div className="p-8 text-center text-muted-foreground">No orders yet.</div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Drink Name</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Sugar</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="w-[120px] text-center"></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {recentOrders.map((order) => (
+                      <TableRow key={order.id}>
+                        <TableCell className="font-medium">{order.drink.name}</TableCell>
+                        <TableCell className="text-muted-foreground whitespace-nowrap">
+                          {format(new Date(order.createdAt), "MMM d, h:mm a")}
+                        </TableCell>
+                        <TableCell>{order.sugar || "None"}</TableCell>
+                        <TableCell>
+                          <StatusBadge status={order.status as any} />
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {order.status === "completed" && (
+                            <Button
+                              variant="default"
+                              size="sm"
+                              className="gap-2 rounded-xl bg-green-600 hover:bg-green-700 text-white shadow-sm border-0"
+                              disabled={isCreating}
+                              onClick={() => createOrder({
+                                drinkId: order.drinkId,
+                                userId: user.id,
+                                sugar: order.sugar || "None",
+                                notes: order.notes
+                              })}
+                            >
+                              <RotateCcw size={14} />
+                              Reorder
+                            </Button>
+                          )}
+                          {order.status === "pending" && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="gap-2 rounded-xl text-red-600 hover:text-red-700 hover:bg-red-50"
+                              onClick={() => updateStatus({ id: order.id, status: "cancelled" })}
+                            >
+                              <XCircle size={14} />
+                              Cancel
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               )}
             </div>
           </ScrollArea>

@@ -30,8 +30,8 @@ export default function AdminDashboard() {
     isAvailable: true
   });
 
-  if (!user || (user.role !== "admin" && user.email !== "admin@company.com")) {
-    if (user && user.role !== "admin" && user.email !== "admin@company.com") setLocation("/");
+  if (!user || (user.role !== "admin" && user.role !== "superadmin")) {
+    if (user && user.role !== "admin" && user.role !== "superadmin") setLocation("/");
     return null;
   }
 
@@ -41,7 +41,7 @@ export default function AdminDashboard() {
       imageUrl: formData.imageUrl || null,
       preparationTime: parseInt(formData.preparationTime) || 5
     };
-    
+
     if (editingDrink) {
       updateDrink({ id: editingDrink.id, ...payload });
     } else {
@@ -101,26 +101,26 @@ export default function AdminDashboard() {
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="name">Name</Label>
-              <Input 
-                id="name" 
-                value={formData.name} 
-                onChange={(e) => setFormData({...formData, name: e.target.value})} 
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="category">Category</Label>
-              <Input 
-                id="category" 
-                value={formData.category} 
-                onChange={(e) => setFormData({...formData, category: e.target.value})} 
+              <Input
+                id="category"
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
               />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="description">Description</Label>
-              <Input 
-                id="description" 
-                value={formData.description} 
-                onChange={(e) => setFormData({...formData, description: e.target.value})} 
+              <Input
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               />
             </div>
             <div className="grid gap-2">
@@ -128,31 +128,31 @@ export default function AdminDashboard() {
               <div className="flex flex-col gap-2">
                 {formData.imageUrl && (
                   <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-border bg-muted">
-                    <img 
-                      src={formData.imageUrl} 
-                      alt="Preview" 
+                    <img
+                      src={formData.imageUrl}
+                      alt="Preview"
                       className="w-full h-full object-contain"
                     />
-                    <Button 
-                      variant="destructive" 
-                      size="icon" 
+                    <Button
+                      variant="destructive"
+                      size="icon"
                       className="absolute top-2 right-2 h-8 w-8 shadow-md"
-                      onClick={() => setFormData({...formData, imageUrl: ""})}
+                      onClick={() => setFormData({ ...formData, imageUrl: "" })}
                     >
                       <Trash2 size={14} />
                     </Button>
                   </div>
                 )}
-                <Input 
-                  id="image" 
-                  type="file" 
+                <Input
+                  id="image"
+                  type="file"
                   accept="image/*"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) {
                       const reader = new FileReader();
                       reader.onloadend = () => {
-                        setFormData({...formData, imageUrl: reader.result as string});
+                        setFormData({ ...formData, imageUrl: reader.result as string });
                       };
                       reader.readAsDataURL(file);
                     }
@@ -164,19 +164,19 @@ export default function AdminDashboard() {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="prepTime">Preparation Time (mins)</Label>
-              <Input 
-                id="prepTime" 
+              <Input
+                id="prepTime"
                 type="number"
-                value={formData.preparationTime} 
-                onChange={(e) => setFormData({...formData, preparationTime: e.target.value})} 
+                value={formData.preparationTime}
+                onChange={(e) => setFormData({ ...formData, preparationTime: e.target.value })}
               />
             </div>
             <div className="flex items-center gap-2">
-              <input 
-                type="checkbox" 
-                id="available" 
+              <input
+                type="checkbox"
+                id="available"
                 checked={formData.isAvailable}
-                onChange={(e) => setFormData({...formData, isAvailable: e.target.checked})}
+                onChange={(e) => setFormData({ ...formData, isAvailable: e.target.checked })}
                 className="rounded border-gray-300 h-4 w-4"
               />
               <Label htmlFor="available">Available for ordering</Label>
@@ -249,8 +249,14 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-3xl font-display font-bold">Admin Dashboard</h2>
-        <p className="text-muted-foreground">Overview of system performance and menu management</p>
+        <h2 className="text-3xl font-display font-bold">
+          {user.role === "superadmin" ? "Global Admin Dashboard" : "Branch Admin Dashboard"}
+        </h2>
+        <p className="text-muted-foreground">
+          {user.role === "superadmin"
+            ? "Overview of all branches performance and menu control"
+            : "Overview of your branch performance and menu management"}
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -296,7 +302,7 @@ export default function AdminDashboard() {
               <BarChart data={chartData}>
                 <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
                 <YAxis fontSize={12} tickLine={false} axisLine={false} />
-                <Tooltip 
+                <Tooltip
                   cursor={{ fill: 'transparent' }}
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                 />

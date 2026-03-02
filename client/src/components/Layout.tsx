@@ -1,14 +1,17 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
-import { 
-  Coffee, 
-  LogOut, 
-  LayoutDashboard, 
-  ChefHat, 
+import {
+  Coffee,
+  LogOut,
+  LayoutDashboard,
+  ChefHat,
   ClipboardList,
   UserCircle,
-  Users
+  Users,
+  User,
+  List,
+  Building
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -24,13 +27,17 @@ export function Layout({ children, showNav = true }: LayoutProps) {
   if (!showNav) return <main className="min-h-screen bg-background">{children}</main>;
 
   const getNavItems = () => {
-    if (user?.role === "admin") {
-      return [
+    if (user?.role === "admin" || user?.role === "superadmin") {
+      const items = [
         { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
         { href: "/admin/menu", label: "Menu Management", icon: Coffee },
-        { href: "/admin/employees", label: "Employee Management", icon: Users },
+        { href: "/admin/users", label: "User Management", icon: Users },
         { href: "/admin/history", label: "History", icon: ClipboardList },
       ];
+      if (user.role === "superadmin") {
+        items.splice(3, 0, { href: "/admin/branches", label: "Branch Management", icon: Building });
+      }
+      return items;
     }
     if (user?.role === "kitchen") {
       return [
@@ -70,8 +77,8 @@ export function Layout({ children, showNav = true }: LayoutProps) {
               return (
                 <Link key={item.href} href={item.href} className={`
                   flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 whitespace-nowrap
-                  ${isActive 
-                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 font-medium" 
+                  ${isActive
+                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 font-medium"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   }
                 `}>
@@ -91,8 +98,8 @@ export function Layout({ children, showNav = true }: LayoutProps) {
               <p className="text-xs text-muted-foreground capitalize">{user?.role}</p>
             </div>
           </div>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="w-full justify-start gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20"
             onClick={() => logout()}
           >
@@ -103,8 +110,8 @@ export function Layout({ children, showNav = true }: LayoutProps) {
 
         {/* Mobile Sign Out (Compact) */}
         <div className="md:hidden p-2 border-t border-border flex justify-end">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="sm"
             className="text-destructive gap-2"
             onClick={() => logout()}

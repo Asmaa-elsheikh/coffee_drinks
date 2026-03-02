@@ -4,7 +4,7 @@ import { type InsertOrder } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 
-type OrderStatus = "pending" | "accepted" | "in_preparation" | "ready" | "completed" | "rejected";
+type OrderStatus = "pending" | "accepted" | "in_preparation" | "ready" | "completed" | "rejected" | "cancelled";
 
 export function useOrders(filters?: { status?: string, userId?: string }, pollInterval = 0) {
   const { toast } = useToast();
@@ -17,7 +17,7 @@ export function useOrders(filters?: { status?: string, userId?: string }, pollIn
       const params = new URLSearchParams();
       if (filters?.status) params.append("status", filters.status);
       if (filters?.userId) params.append("userId", filters.userId);
-      
+
       const url = `${api.orders.list.path}?${params.toString()}`;
       const res = await fetch(url, { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch orders");
@@ -50,7 +50,7 @@ export function useOrders(filters?: { status?: string, userId?: string }, pollIn
       const url = buildUrl(api.orders.updateStatus.path, { id });
       const payload = { status, rejectionReason };
       const validated = api.orders.updateStatus.input.parse(payload);
-      
+
       const res = await fetch(url, {
         method: api.orders.updateStatus.method,
         headers: { "Content-Type": "application/json" },
@@ -67,7 +67,8 @@ export function useOrders(filters?: { status?: string, userId?: string }, pollIn
         in_preparation: "Started preparing",
         ready: "Order marked ready",
         completed: "Order completed",
-        rejected: "Order rejected"
+        rejected: "Order rejected",
+        cancelled: "Order cancelled"
       };
       toast({ title: "Status Updated", description: messages[variables.status] || "Status changed" });
     },

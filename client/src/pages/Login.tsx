@@ -34,10 +34,10 @@ export default function Login() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input 
-                  id="email" 
+                <Input
+                  id="email"
                   type="email"
-                  value={email} 
+                  value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="rounded-xl"
                   placeholder="employee@company.com"
@@ -46,10 +46,10 @@ export default function Login() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input 
-                  id="password" 
+                <Input
+                  id="password"
                   type="password"
-                  value={password} 
+                  value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="rounded-xl"
                   required

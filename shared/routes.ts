@@ -106,7 +106,7 @@ export const api = {
       method: "PATCH" as const,
       path: "/api/orders/:id/status",
       input: z.object({
-        status: z.enum(["pending", "accepted", "in_preparation", "ready", "completed", "rejected"]),
+        status: z.enum(["pending", "accepted", "in_preparation", "ready", "completed", "rejected", "cancelled"]),
         rejectionReason: z.string().optional(),
       }),
       responses: {

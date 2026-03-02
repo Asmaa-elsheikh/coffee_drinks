@@ -12,19 +12,20 @@
   /* HSL Values */
   --background: 210 20% 98%;
   --foreground: 222 47% 11%;
-  
+
   --primary: 221 83% 53%;
   --primary-foreground: 210 40% 98%;
-  
+
   --secondary: 210 40% 96%;
   --secondary-foreground: 222 47% 11%;
-  
+
   --muted: 210 40% 96%;
   --muted-foreground: 215 16% 47%;
-  
-  --accent: 142 76% 36%; /* Fresh green for success/availability */
+
+  --accent: 142 76% 36%;
+  /* Fresh green for success/availability */
   --accent-foreground: 356 29% 98%;
-  
+
   --destructive: 0 84% 60%;
   --destructive-foreground: 210 40% 98%;
 
@@ -38,22 +39,22 @@
 .dark {
   --background: 222 47% 11%;
   --foreground: 210 40% 98%;
-  
+
   --primary: 217 91% 60%;
   --primary-foreground: 222 47% 11%;
-  
+
   --secondary: 217 32% 17%;
   --secondary-foreground: 210 40% 98%;
-  
+
   --muted: 217 32% 17%;
   --muted-foreground: 215 20% 65%;
-  
+
   --accent: 142 70% 45%;
   --accent-foreground: 210 40% 98%;
-  
+
   --destructive: 0 62% 30%;
   --destructive-foreground: 210 40% 98%;
-  
+
   --border: 217 32% 17%;
   --input: 217 32% 17%;
   --ring: 217 91% 60%;
@@ -65,7 +66,12 @@
     font-family: var(--font-sans);
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-display);
     @apply font-bold tracking-tight text-foreground;
   }
@@ -76,7 +82,7 @@
   .glass-card {
     @apply bg-white/80 dark:bg-black/40 backdrop-blur-md border border-white/20 dark:border-white/10 shadow-xl;
   }
-  
+
   .hover-scale {
     @apply transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98];
   }
@@ -84,6 +90,7 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;

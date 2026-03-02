@@ -12,16 +12,17 @@ import EmployeeMenu from "@/pages/EmployeeMenu";
 import KitchenDashboard from "@/pages/KitchenDashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminHistory from "@/pages/AdminHistory";
-import AdminEmployees from "@/pages/AdminEmployees";
+import AdminUsers from "@/pages/AdminUsers";
+import AdminBranches from "@/pages/AdminBranches";
 import NotFound from "@/pages/not-found";
 
 // Protected Route Wrapper
-function ProtectedRoute({ 
-  component: Component, 
-  allowedRoles 
-}: { 
-  component: React.ComponentType, 
-  allowedRoles?: string[] 
+function ProtectedRoute({
+  component: Component,
+  allowedRoles
+}: {
+  component: React.ComponentType,
+  allowedRoles?: string[]
 }) {
   const { user, isLoading } = useAuth();
   const [, setLocation] = useLocation();
@@ -41,7 +42,7 @@ function ProtectedRoute({
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
     // Redirect to their appropriate dashboard if they try to access unauthorized pages
-    if (user.role === "admin") setLocation("/admin");
+    if (user.role === "admin" || user.role === "superadmin") setLocation("/admin");
     else if (user.role === "kitchen") setLocation("/kitchen");
     else setLocation("/");
     return null;
@@ -64,9 +65,9 @@ function Router() {
       <Route path="/">
         {() => <ProtectedRoute component={EmployeeMenu} allowedRoles={["employee"]} />}
       </Route>
-      
+
       <Route path="/history">
-         {/* Reusing EmployeeMenu component logic for now, or could split into separate HistoryPage */}
+        {/* Reusing EmployeeMenu component logic for now, or could split into separate HistoryPage */}
         {() => <ProtectedRoute component={EmployeeMenu} allowedRoles={["employee"]} />}
       </Route>
 
@@ -80,19 +81,23 @@ function Router() {
       </Route>
 
       <Route path="/admin">
-        {() => <ProtectedRoute component={AdminDashboard} allowedRoles={["admin"]} />}
+        {() => <ProtectedRoute component={AdminDashboard} allowedRoles={["admin", "superadmin"]} />}
       </Route>
 
       <Route path="/admin/menu">
-        {() => <ProtectedRoute component={AdminDashboard} allowedRoles={["admin"]} />}
+        {() => <ProtectedRoute component={AdminDashboard} allowedRoles={["admin", "superadmin"]} />}
       </Route>
 
       <Route path="/admin/history">
-        {() => <ProtectedRoute component={AdminHistory} allowedRoles={["admin"]} />}
+        {() => <ProtectedRoute component={AdminHistory} allowedRoles={["admin", "superadmin"]} />}
       </Route>
 
-      <Route path="/admin/employees">
-        {() => <ProtectedRoute component={AdminEmployees} allowedRoles={["admin"]} />}
+      <Route path="/admin/users">
+        {() => <ProtectedRoute component={AdminUsers} allowedRoles={["admin", "superadmin"]} />}
+      </Route>
+
+      <Route path="/admin/branches">
+        {() => <ProtectedRoute component={AdminBranches} allowedRoles={["superadmin"]} />}
       </Route>
 
       <Route component={NotFound} />

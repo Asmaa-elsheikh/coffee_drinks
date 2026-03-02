@@ -9,6 +9,8 @@ import session from "express-session";
 import createMemoryStore from "memorystore";
 
 import bcrypt from "bcrypt";
+import { supabase } from "./db";
+import { toCamel } from "./storage";
 
 const MemoryStore = createMemoryStore(session);
 
@@ -24,7 +26,7 @@ export async function registerRoutes(
     store: new MemoryStore({
       checkPeriod: 86400000 // prune expired entries every 24h
     }),
-    cookie: { 
+    cookie: {
       secure: process.env.NODE_ENV === "production",
       maxAge: 24 * 60 * 60 * 1000 // 24 hours
     }
@@ -35,15 +37,22 @@ export async function registerRoutes(
 
   passport.use(new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
     try {
+      console.log(`Login attempt for: ${email}`);
       const user = await storage.getUserByEmail(email);
-      if (!user) return done(null, false, { message: "Incorrect email." });
-      
+      if (!user) {
+        console.log(`User not found: ${email}`);
+        return done(null, false, { message: "Incorrect email." });
+      }
+
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
+        console.log(`Invalid password for: ${email}`);
         return done(null, false, { message: "Incorrect password." });
       }
+      console.log(`Successful login: ${email} (Role: ${user.role}, BranchID: ${user.branchId})`);
       return done(null, user);
     } catch (err) {
+      console.error(`Login error for ${email}:`, err);
       return done(err);
     }
   }));
@@ -84,42 +93,135 @@ export async function registerRoutes(
     res.sendStatus(401);
   };
 
+  // Branch Routes
+  app.get("/api/branches", requireAuth, async (_req, res) => {
+    // Both admin and superadmin need to see branches for selection
+    const branches = await storage.getBranches();
+    res.json(branches);
+  });
+
+  app.post("/api/branches", requireAuth, async (req, res) => {
+    const user = req.user as any;
+    if (user.role !== "superadmin") return res.sendStatus(403);
+    const branch = await storage.createBranch(req.body);
+    res.status(201).json(branch);
+  });
+
+  app.delete("/api/branches/:id", requireAuth, async (req, res) => {
+    const user = req.user as any;
+    if (user.role !== "superadmin") return res.sendStatus(403);
+    const id = parseInt(req.params.id);
+    // Note: We might want to prevent deleting branches with users/drinks
+    await supabase.from('branches').delete().eq('id', id);
+    res.sendStatus(204);
+  });
+
   // Drink Routes
-  app.get(api.drinks.list.path, async (req, res) => {
-    const drinks = await storage.getDrinks();
+  app.get(api.drinks.list.path, requireAuth, async (req, res) => {
+    const user = req.user as any;
+    const branchId = user.role === "superadmin"
+      ? (req.query.branchId ? parseInt(req.query.branchId as string) : undefined)
+      : (user.branchId ? parseInt(user.branchId.toString()) : undefined);
+
+    const drinks = await storage.getDrinks(branchId);
     res.json(drinks);
   });
 
-  // Employee Management Routes
-  app.get("/api/admin/employees", requireAuth, async (req, res) => {
+  // User Management Routes (formerly Employee Management)
+  app.get("/api/admin/users", requireAuth, async (req, res) => {
     const user = req.user as any;
-    if (user.role !== "admin") return res.sendStatus(403);
-    const employees = await storage.getUsersByRole("employee");
-    res.json(employees);
+    if (user.role !== "admin" && user.role !== "superadmin") return res.sendStatus(403);
+
+    let usersList;
+    if (user.role === "superadmin") {
+      // Superadmin sees everyone initially, or we filter by branch if provided
+      const branchId = req.query.branchId ? parseInt(req.query.branchId as string) : undefined;
+      const { data } = await supabase.from('users').select('*').order('name');
+      usersList = (data || []).map(toCamel);
+      if (branchId) {
+        usersList = usersList.filter((u: any) => u.branchId === branchId);
+      }
+    } else {
+      // Admin only sees their branch's users
+      const { data } = await supabase.from('users').select('*').eq('branch_id', user.branchId).order('name');
+      usersList = (data || []).map(toCamel);
+    }
+    res.json(usersList);
   });
 
-  app.post("/api/admin/employees", requireAuth, async (req, res) => {
+  app.post("/api/admin/users", requireAuth, async (req, res) => {
     const user = req.user as any;
-    if (user.role !== "admin") return res.sendStatus(403);
-    const employee = await storage.createUser({
-      ...req.body,
-      role: "employee",
-      username: req.body.email.split('@')[0] // temporary username
-    });
-    res.status(201).json(employee);
+    if (user.role !== "admin" && user.role !== "superadmin") return res.sendStatus(403);
+
+    const { role, branchId, assignedKitchenId, email } = req.body;
+    // Security: No one can create a Super Admin. Branch Admin cannot create another Admin.
+    if (role === "superadmin") {
+      return res.status(403).json({ message: "System only allows one Super Admin. Cannot create another." });
+    }
+    if (user.role === "admin" && role === "admin") {
+      return res.status(403).json({ message: "Branch Admins cannot create other Admins." });
+    }
+
+    // Sanitize numeric fields
+    const bId = user.role === "superadmin"
+      ? (branchId && branchId !== "" ? parseInt(branchId.toString()) : null)
+      : (user.branchId ? parseInt(user.branchId.toString()) : null);
+
+    const kId = (assignedKitchenId && assignedKitchenId !== "" && assignedKitchenId !== "none") ? parseInt(assignedKitchenId.toString()) : null;
+
+    try {
+      if (user.role === "superadmin" && !bId && (role === "admin" || role === "employee" || role === "kitchen")) {
+        return res.status(400).json({ message: "Branch selection is required for this role." });
+      }
+
+      const newUser = await storage.createUser({
+        ...req.body,
+        branchId: bId,
+        assignedKitchenId: kId,
+        username: email.split('@')[0]
+      });
+      res.status(201).json(newUser);
+    } catch (err: any) {
+      console.error("Error creating user:", err);
+      res.status(400).json({ message: err.message || "Failed to create user" });
+    }
   });
 
-  app.patch("/api/admin/employees/:id", requireAuth, async (req, res) => {
+  app.patch("/api/admin/users/:id", requireAuth, async (req, res) => {
     const user = req.user as any;
-    if (user.role !== "admin") return res.sendStatus(403);
+    if (user.role !== "admin" && user.role !== "superadmin") return res.sendStatus(403);
+
+    const { role, branchId, assignedKitchenId } = req.body;
+    // Security: No one can promote to Super Admin. Branch Admin cannot promote to Admin.
+    if (role === "superadmin") {
+      return res.status(403).json({ message: "Promotion to Super Admin is not allowed." });
+    }
+    if (user.role === "admin" && role === "admin") {
+      return res.status(403).json({ message: "Branch Admins cannot grant Admin privileges." });
+    }
     const id = parseInt(req.params.id);
-    const updated = await storage.updateUser(id, req.body);
-    res.json(updated);
+
+    // Ensure numeric values and handle empty strings
+    const updates = { ...req.body };
+    if (updates.branchId !== undefined) {
+      updates.branchId = (updates.branchId && updates.branchId !== "") ? parseInt(updates.branchId.toString()) : null;
+    }
+    if (updates.assignedKitchenId !== undefined) {
+      updates.assignedKitchenId = (updates.assignedKitchenId && updates.assignedKitchenId !== "") ? parseInt(updates.assignedKitchenId.toString()) : null;
+    }
+
+    try {
+      const updated = await storage.updateUser(id, updates);
+      res.json(updated);
+    } catch (err: any) {
+      console.error("Error updating user:", err);
+      res.status(400).json({ message: err.message || "Failed to update user" });
+    }
   });
 
-  app.delete("/api/admin/employees/:id", requireAuth, async (req, res) => {
+  app.delete("/api/admin/users/:id", requireAuth, async (req, res) => {
     const user = req.user as any;
-    if (user.role !== "admin") return res.sendStatus(403);
+    if (user.role !== "admin" && user.role !== "superadmin") return res.sendStatus(403);
     const id = parseInt(req.params.id);
     await storage.deleteUser(id);
     res.sendStatus(204);
@@ -128,10 +230,13 @@ export async function registerRoutes(
   app.post(api.drinks.create.path, requireAuth, async (req, res) => {
     try {
       const user = req.user as any;
-      if (user.role !== "admin") return res.sendStatus(403);
-      
+      if (user.role !== "admin" && user.role !== "superadmin") return res.sendStatus(403);
+
       const input = api.drinks.create.input.parse(req.body);
-      const drink = await storage.createDrink(input);
+      const drink = await storage.createDrink({
+        ...input,
+        branchId: user.role === "superadmin" ? (req.body.branchId || user.branchId) : user.branchId
+      });
       res.status(201).json(drink);
     } catch (err) {
       console.error("Error creating drink:", err);
@@ -144,8 +249,8 @@ export async function registerRoutes(
 
   app.patch(api.drinks.update.path, requireAuth, async (req, res) => {
     const user = req.user as any;
-    if (user.role !== "admin" && user.email !== "admin@company.com") return res.sendStatus(403);
-    
+    if (user.role !== "admin" && user.role !== "superadmin" && user.email !== "asmaali.elsheikh@gmail.com") return res.sendStatus(403);
+
     const id = parseInt(req.params.id as string);
     const input = api.drinks.update.input.parse(req.body);
     const updated = await storage.updateDrink(id, input);
@@ -154,8 +259,8 @@ export async function registerRoutes(
 
   app.delete(api.drinks.delete.path, requireAuth, async (req, res) => {
     const user = req.user as any;
-    if (user.role !== "admin" && user.email !== "admin@company.com") return res.sendStatus(403);
-    
+    if (user.role !== "admin" && user.role !== "superadmin") return res.sendStatus(403);
+
     await storage.deleteDrink(parseInt(req.params.id as string));
     res.sendStatus(204);
   });
@@ -164,18 +269,19 @@ export async function registerRoutes(
   app.get(api.orders.list.path, requireAuth, async (req, res) => {
     const user = req.user as any;
     const filters: any = {};
-    
-    // Fix History Views
-    const isRealAdmin = user.email === 'asmaa.ali@qara.net';
-    const isKitchen = user.role === 'kitchen';
-    const isDemoAdmin = user.email === 'admin@company.com';
 
-    if (isRealAdmin || isKitchen) {
-      // Real admin and kitchen see everything
-    } else if (isDemoAdmin) {
-      // Demo admin only sees demo accounts' orders
-      const demoUserIds = await storage.getDemoUserIds();
-      filters.userIds = demoUserIds;
+    // Fix History Views
+    const isRealAdmin = typeof user.email === 'string' && (user.email === 'asmaa.ali@qara.net' || user.email === 'asmaali.elsheikh@gmail.com');
+    const isKitchen = user.role === 'kitchen';
+    const isDemoAdmin = user.email === 'asmaali.elsheikh@gmail.com';
+
+    if (user.role === 'superadmin' || isKitchen) {
+      // Superadmin and kitchen see everything or filter by branch if implemented
+      if (req.query.branchId) filters.branchId = parseInt(req.query.branchId as string);
+      if (isKitchen) filters.kitchenId = user.id; // Kitchen only sees orders assigned to them
+    } else if (user.role === 'admin') {
+      // Admin sees their branch's orders
+      filters.branchId = user.branchId;
     } else {
       // Regular users only see their own
       filters.userId = user.id;
@@ -188,13 +294,22 @@ export async function registerRoutes(
 
     console.log(`Fetching orders for user ${user.id} (${user.role}) with filters:`, filters);
     const ordersData = await storage.getOrders(filters);
+    console.log(`Found ${ordersData.length} orders. First order keys:`, ordersData[0] ? Object.keys(ordersData[0]) : 'none');
     res.json(ordersData);
   });
 
   app.post(api.orders.create.path, requireAuth, async (req, res) => {
     try {
+      const user = req.user as any;
       const input = api.orders.create.input.parse(req.body);
-      const order = await storage.createOrder(input);
+      console.log(`Creating order for user ${user.id} (Branch: ${user.branchId}, Kitchen: ${user.assignedKitchenId})`);
+      const order = await storage.createOrder({
+        ...input,
+        userId: user.id,
+        branchId: user.branchId,
+        kitchenId: user.assignedKitchenId // Automatically assign to the user's kitchen
+      });
+      console.log(`Order created successfully: ID ${order.id}`);
       res.status(201).json(order);
     } catch (err) {
       if (err instanceof z.ZodError) {
@@ -213,9 +328,14 @@ export async function registerRoutes(
 
   // Analytics
   app.get(api.analytics.stats.path, requireAuth, async (req, res) => {
-    const ordersData = await storage.getOrders();
-    const popularDrinks = await storage.getPopularDrinks();
-    const orderStats = await storage.getOrderStats();
+    const user = req.user as any;
+    const filters: any = {};
+    if (user.role === 'admin') filters.branchId = user.branchId;
+    else if (user.role === 'superadmin' && req.query.branchId) filters.branchId = parseInt(req.query.branchId as string);
+
+    const ordersData = await storage.getOrders(filters);
+    const popularDrinks = await storage.getPopularDrinks(filters.branchId);
+    const orderStats = await storage.getOrderStats(filters.branchId);
 
     const stats = {
       totalOrders: ordersData.length,
@@ -225,50 +345,106 @@ export async function registerRoutes(
     res.json(stats);
   });
 
+  // API 404 Handler - MUST be before Vite catch-all
+  // Using app.use("/api", ...) will capture all /api/... requests that didn't match above
+  app.use("/api", (_req, res) => {
+    res.status(404).json({ message: "API endpoint not found" });
+  });
+
+  console.log("Registered all routes, running seed...");
   // Seed Data
   await seed();
+  console.log("Seeding finished.");
 
   return httpServer;
 }
 
 async function seed() {
-  const adminUser = await storage.getUserByUsername("admin");
-  if (!adminUser) {
-    // Create Users
-    await storage.createUser({ 
-      username: "admin", 
-      email: "admin@company.com",
-      password: "password123", 
-      role: "admin",
-      name: "System Admin"
-    });
-    await storage.createUser({ 
-      username: "kitchen", 
-      email: "kitchen@company.com",
-      password: "password123", 
-      role: "kitchen",
-      name: "Kitchen Staff"
-    });
-    await storage.createUser({ 
-      username: "employee1", 
-      email: "employee1@company.com",
-      password: "password123", 
-      role: "employee",
-      name: "John Doe"
-    });
+  console.log("Running hierarchical database seeding...");
 
-    // Create Drinks
-    const drinksList = [
-      { name: "Tea", imageUrl: "https://images.unsplash.com/photo-1594631252845-29fc45865157?w=800&q=80", category: "Tea", preparationTime: 3, isAvailable: true, description: "Classic hot tea" },
-      { name: "Turkish Coffee", imageUrl: "https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=800&q=80", category: "Coffee", preparationTime: 5, isAvailable: true, description: "Traditional Turkish coffee" },
-      { name: "French Coffee", imageUrl: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&q=80", category: "Coffee", preparationTime: 5, isAvailable: true, description: "Smooth French press coffee" },
-      { name: "Nescafe", imageUrl: "https://images.unsplash.com/photo-1541167760496-1628856ab752?w=800&q=80", category: "Coffee", preparationTime: 2, isAvailable: true, description: "Quick instant coffee" },
-      { name: "Espresso", imageUrl: "https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=800&q=80", category: "Coffee", preparationTime: 2, isAvailable: true, description: "Strong single shot" },
-      { name: "Herbs", imageUrl: "https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=800&q=80", category: "Tea", preparationTime: 4, isAvailable: true, description: "Assorted herbal infusion" }
-    ];
+  const superAdminEmail = "asmaali.elsheikh@gmail.com";
 
-    for (const drink of drinksList) {
-      await storage.createDrink(drink);
+  try {
+    // 1. Ensure a default branch exists
+    let branches = await storage.getBranches();
+    let defaultBranch;
+    if (branches.length === 0) {
+      console.log("Seeding: Creating default branch...");
+      defaultBranch = await storage.createBranch({ name: "Main Office" });
+    } else {
+      defaultBranch = branches[0];
     }
+
+    // 2. Super Admin
+    let superAdmin = await storage.getUserByEmail(superAdminEmail);
+    if (!superAdmin) {
+      console.log(`Seeding: Super Admin (${superAdminEmail}) not found. Creating...`);
+      superAdmin = await storage.createUser({
+        username: "admin",
+        email: superAdminEmail,
+        password: "password123",
+        role: "superadmin",
+        name: "Super Admin",
+        branchId: defaultBranch.id
+      });
+    } else {
+      console.log(`Seeding: Super Admin (${superAdminEmail}) found. Ensuring role and branch...`);
+      await storage.updateUser(superAdmin.id, {
+        role: "superadmin",
+        branchId: defaultBranch.id
+      });
+    }
+
+    // 3. Kitchen User for default branch
+    const kitchenUsername = "kitchen";
+    let kitchenUser = await storage.getUserByUsername(kitchenUsername);
+    if (!kitchenUser) {
+      console.log("Seeding: Creating Kitchen Staff...");
+      kitchenUser = await storage.createUser({
+        username: kitchenUsername,
+        email: "kitchen@company.com",
+        password: "password123",
+        role: "kitchen",
+        name: "Kitchen Staff",
+        branchId: defaultBranch.id
+      });
+    }
+
+    // 4. Employee User for default branch
+    const employeeUsername = "employee1";
+    let employee1 = await storage.getUserByUsername(employeeUsername);
+    if (!employee1) {
+      console.log("Seeding: Creating Employee...");
+      await storage.createUser({
+        username: employeeUsername,
+        email: "employee1@company.com",
+        password: "password123",
+        role: "employee",
+        name: "John Doe",
+        branchId: defaultBranch.id,
+        assignedKitchenId: kitchenUser.id // Assign to the default kitchen
+      });
+    }
+
+    // 5. Drinks for default branch
+    const drinks = await storage.getDrinks(defaultBranch.id);
+    if (drinks.length === 0) {
+      console.log("Seeding: Populating drinks for default branch...");
+      const drinksList = [
+        { name: "Tea", category: "Tea", preparationTime: 3, isAvailable: true, description: "Classic hot tea", branchId: defaultBranch.id },
+        { name: "Turkish Coffee", category: "Coffee", preparationTime: 5, isAvailable: true, description: "Traditional Turkish coffee", branchId: defaultBranch.id },
+        { name: "French Coffee", category: "Coffee", preparationTime: 5, isAvailable: true, description: "Smooth French press coffee", branchId: defaultBranch.id },
+        { name: "Nescafe", category: "Coffee", preparationTime: 2, isAvailable: true, description: "Quick instant coffee", branchId: defaultBranch.id },
+        { name: "Espresso", category: "Coffee", preparationTime: 2, isAvailable: true, description: "Strong single shot", branchId: defaultBranch.id },
+        { name: "Herbs", category: "Tea", preparationTime: 4, isAvailable: true, description: "Assorted herbal infusion", branchId: defaultBranch.id }
+      ];
+
+      for (const drink of drinksList) {
+        await storage.createDrink(drink);
+      }
+    }
+    console.log("Seeding completed successfully.");
+  } catch (err) {
+    console.error("Seeding failed:", err);
   }
 }

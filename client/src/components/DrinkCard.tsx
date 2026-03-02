@@ -32,25 +32,27 @@ export function DrinkCard({ drink, onOrder, isOrdering }: DrinkCardProps) {
       <div className="group bg-card rounded-2xl border border-border/50 hover:border-primary/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full">
         <div className="aspect-[4/3] bg-muted relative overflow-hidden flex items-center justify-center text-muted-foreground/30">
           {drink.imageUrl ? (
-            <img 
-              src={drink.imageUrl} 
+            <img
+              src={drink.imageUrl}
               alt={drink.name}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               onError={(e) => {
                 // Fallback if image fails to load
-                (e.target as HTMLImageElement).src = "";
-                (e.target as HTMLImageElement).style.display = 'none';
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                // Show the parent's icon by setting a state or using a CSS-only approach
+                // Since we can't easily add state here without more changes, 
+                // we'll just ensure the <img> is hidden and the fallback is correctly positioned.
               }}
             />
           ) : (
             <Coffee size={64} strokeWidth={1} />
           )}
-          {!drink.imageUrl && <Coffee size={64} strokeWidth={1} />}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
             <span className="text-white font-medium">{drink.category}</span>
           </div>
         </div>
-        
+
         <div className="p-5 flex-1 flex flex-col">
           <div className="flex justify-between items-start mb-2">
             <h3 className="font-display font-bold text-lg leading-tight">{drink.name}</h3>
@@ -61,13 +63,13 @@ export function DrinkCard({ drink, onOrder, isOrdering }: DrinkCardProps) {
               </div>
             )}
           </div>
-          
+
           <p className="text-sm text-muted-foreground mb-6 line-clamp-2 flex-1">
             {drink.description || "A delicious choice for your break."}
           </p>
-          
-          <Button 
-            onClick={() => setOpen(true)} 
+
+          <Button
+            onClick={() => setOpen(true)}
             disabled={!drink.isAvailable || isOrdering}
             className={`w-full rounded-xl gap-2 ${!drink.isAvailable ? 'opacity-50' : ''}`}
           >
@@ -91,7 +93,7 @@ export function DrinkCard({ drink, onOrder, isOrdering }: DrinkCardProps) {
               Adjust your drink to your taste.
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="grid gap-6 py-4">
             <div className="space-y-2">
               <Label htmlFor="sugar">Sugar Level</Label>
@@ -107,12 +109,12 @@ export function DrinkCard({ drink, onOrder, isOrdering }: DrinkCardProps) {
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="notes">Special Requests</Label>
-              <Textarea 
-                id="notes" 
-                placeholder="E.g. Extra hot, oat milk..." 
+              <Textarea
+                id="notes"
+                placeholder="E.g. Extra hot, oat milk..."
                 className="rounded-xl resize-none"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}

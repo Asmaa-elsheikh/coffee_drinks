@@ -12,6 +12,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default function KitchenDashboard() {
   const { user } = useAuth();
@@ -19,10 +27,10 @@ export default function KitchenDashboard() {
   // Use different filters for history vs queue
   const isHistoryPage = location.startsWith("/kitchen/history");
   const { orders, isLoading, updateStatus } = useOrders(
-    { status: isHistoryPage ? "completed,rejected,ready" : "pending,accepted,in_preparation" }, 
+    { status: isHistoryPage ? "completed,rejected,ready,cancelled" : "pending,accepted,in_preparation" },
     5000
   );
-  
+
   const [rejectId, setRejectId] = useState<number | null>(null);
   const [rejectReason, setRejectReason] = useState("");
 
@@ -48,30 +56,44 @@ export default function KitchenDashboard() {
           <h2 className="text-3xl font-display font-bold">Kitchen Order History</h2>
           <p className="text-muted-foreground">Review completed and rejected orders</p>
         </div>
-        
+
         <Card className="rounded-2xl overflow-hidden border-border/50 shadow-sm">
           <ScrollArea className="h-[calc(100vh-250px)]">
             <div className="p-0">
-              {orders?.map((order) => (
-                <div key={order.id} className="flex items-center justify-between p-4 border-b last:border-0 hover:bg-muted/30 transition-colors">
-                  <div className="flex flex-col">
-                    <span className="font-medium text-lg">{order.drink.name}</span>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span>for {order.user.name}</span>
-                      <span>•</span>
-                      <span>{format(new Date(order.createdAt), "MMM d, h:mm a")}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <StatusBadge status={order.status as any} />
-                  </div>
-                </div>
-              ))}
-              {(!orders || orders.length === 0) && (
+              {(!orders || orders.length === 0) ? (
                 <div className="p-12 text-center text-muted-foreground">
                   <ClipboardList className="mx-auto mb-4 opacity-20" size={48} />
                   <p>No history records found.</p>
                 </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Drink Name</TableHead>
+                      <TableHead className="text-center">Customer</TableHead>
+                      <TableHead className="text-center">Date</TableHead>
+                      <TableHead className="text-left">Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {orders.map((order) => (
+                      <TableRow key={order.id}>
+                        <TableCell className="font-medium">
+                          {order.drink.name}
+                        </TableCell>
+                        <TableCell className="text-center text-muted-foreground">
+                          {order.user.name}
+                        </TableCell>
+                        <TableCell className="text-center text-muted-foreground whitespace-nowrap">
+                          {format(new Date(order.createdAt), "MMM d, h:mm a")}
+                        </TableCell>
+                        <TableCell className="text-left">
+                          <StatusBadge status={order.status as any} />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               )}
             </div>
           </ScrollArea>
@@ -109,7 +131,7 @@ export default function KitchenDashboard() {
           <h3 className="text-xl font-bold flex items-center gap-2 text-muted-foreground uppercase tracking-wider text-sm">
             <AlertCircle size={16} /> Incoming Requests
           </h3>
-          
+
           {isLoading ? (
             <Skeleton className="h-32 w-full rounded-2xl" />
           ) : pendingOrders.length === 0 ? (
@@ -143,16 +165,16 @@ export default function KitchenDashboard() {
                   </div>
                 </CardContent>
                 <CardFooter className="pt-2 justify-end gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     className="text-destructive hover:bg-destructive/10 border-destructive/20"
                     onClick={() => setRejectId(order.id)}
                   >
                     <X size={16} className="mr-1" /> Reject
                   </Button>
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     onClick={() => updateStatus({ id: order.id, status: "accepted" })}
                   >
                     <Check size={16} className="mr-1" /> Accept
@@ -204,7 +226,7 @@ export default function KitchenDashboard() {
                 </CardContent>
                 <CardFooter className="pt-2 justify-end gap-2">
                   {order.status === "accepted" && (
-                    <Button 
+                    <Button
                       variant="outline"
                       className="w-full border-primary/20 text-primary hover:bg-primary/5"
                       onClick={() => updateStatus({ id: order.id, status: "in_preparation" })}
@@ -213,7 +235,7 @@ export default function KitchenDashboard() {
                     </Button>
                   )}
                   {order.status === "in_preparation" && (
-                    <Button 
+                    <Button
                       className="w-full bg-green-600 hover:bg-green-700"
                       onClick={() => updateStatus({ id: order.id, status: "ready" })}
                     >
@@ -232,8 +254,8 @@ export default function KitchenDashboard() {
           <DialogHeader>
             <DialogTitle>Reject Order</DialogTitle>
           </DialogHeader>
-          <Input 
-            placeholder="Reason for rejection (e.g. Out of milk)" 
+          <Input
+            placeholder="Reason for rejection (e.g. Out of milk)"
             value={rejectReason}
             onChange={(e) => setRejectReason(e.target.value)}
           />

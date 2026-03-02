@@ -12,11 +12,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 export default function AdminHistory() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
-  const { orders, isLoading } = useOrders({});
+  const { orders, isLoading } = useOrders({ status: "completed" });
   const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), "yyyy-MM"));
 
-  if (!user || user.role !== "admin") {
-    if (user && user.role !== "admin") setLocation("/");
+  if (!user || (user.role !== "admin" && user.role !== "superadmin")) {
+    if (user && user.role !== "admin" && user.role !== "superadmin") setLocation("/");
     return null;
   }
 
@@ -39,12 +39,12 @@ export default function AdminHistory() {
     const year = orderDate.getFullYear();
     const month = String(orderDate.getMonth() + 1).padStart(2, '0');
     const orderMonth = `${year}-${month}`;
-    
+
     // Debug specific month
     if (orderMonth === "2026-01") {
       console.log("Found Jan 2026 order:", order.id, "User:", order.user.email);
     }
-    
+
     return orderMonth === selectedMonth;
   });
 
@@ -52,7 +52,7 @@ export default function AdminHistory() {
     const date = format(new Date(order.createdAt), "yyyy-MM-dd");
     const employeeName = order.user.name;
     const drinkName = order.drink.name;
-    
+
     const key = `${date}_${employeeName}`;
     if (!acc[key]) {
       acc[key] = {
@@ -62,13 +62,13 @@ export default function AdminHistory() {
         totalCount: 0
       };
     }
-    
+
     acc[key].drinks[drinkName] = (acc[key].drinks[drinkName] || 0) + 1;
     acc[key].totalCount += 1;
     return acc;
   }, {});
 
-  const historyRows: any[] = Object.values(aggregatedData || {}).sort((a: any, b: any) => 
+  const historyRows: any[] = Object.values(aggregatedData || {}).sort((a: any, b: any) =>
     b.date.localeCompare(a.date) || a.employeeName.localeCompare(b.employeeName)
   );
 
@@ -92,14 +92,14 @@ export default function AdminHistory() {
       // Ensure UTF-8 with BOM for Excel compatibility
       const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
-      
+
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute("download", `drink_history_${selectedMonth}.csv`);
       link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
-      
+
       setTimeout(() => {
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
