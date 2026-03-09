@@ -14,10 +14,10 @@ import { toCamel } from "./storage";
 
 const MemoryStore = createMemoryStore(session);
 
-export async function registerRoutes(
+export function registerRoutes(
   httpServer: Server,
   app: Express
-): Promise<Server> {
+): Server {
   // Auth Setup
   app.use(session({
     secret: process.env.SESSION_SECRET || "secret",
@@ -351,10 +351,9 @@ export async function registerRoutes(
     res.status(404).json({ message: "API endpoint not found" });
   });
 
-  console.log("Registered all routes, running seed...");
-  // Seed Data
-  await seed();
-  console.log("Seeding finished.");
+  console.log("Registered all routes.");
+  // Background the seed so it doesn't block startup or Vercel execution
+  seed().catch(err => console.error("Background seeding failed:", err));
 
   return httpServer;
 }

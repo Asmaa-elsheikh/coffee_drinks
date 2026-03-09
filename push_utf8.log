@@ -1,0 +1,32 @@
+﻿No config path provided, using default 'drizzle.config.ts'
+Reading config file 'C:\Users\Admin\Downloads\Office-Drinks-Order\Office-Drinks-Order\drizzle.config.ts'
+[dotenv@17.3.1] injecting env (0) from .env -- tip: ΓÜí∩╕Å secrets for agents: https://dotenvx.com/as2
+Using 'pg' driver for database querying
+[Γú╖] Pulling schema from database...
+node.exe : Error: getaddrinfo ENOTFOUND 
+db.dainnwasbsejppsakyrl.supabase.co
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Error: g 
+   etaddri...yrl.supabase.co:String) [], RemoteExcep  
+  tion
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+    at C:\Users\Admin\Downloads\Office-Drinks-Order\Of
+fice-Drinks-Order\node_modules\pg-pool\index.js:45:11
+    at process.processTicksAndRejections 
+(node:internal/process/task_queues:103:5)
+    at async Object.query (C:\Users\Admin\Downloads\Of
+fice-Drinks-Order\Office-Drinks-Order\node_modules\dri
+zzle-kit\bin.cjs:80622:26)
+    at async fromDatabase2 (C:\Users\Admin\Downloads\O
+ffice-Drinks-Order\Office-Drinks-Order\node_modules\dr
+izzle-kit\bin.cjs:19276:25) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'db.dainnwasbsejppsakyrl.supabase.co'
+}

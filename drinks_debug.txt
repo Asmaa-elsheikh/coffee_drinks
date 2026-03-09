@@ -1,0 +1,13 @@
+Current Drinks in Database:
+ID: 3 | Name: French Coffee | Branch: null | Image: PRESENT | Deleted: false
+ID: 4 | Name: Nescafe | Branch: null | Image: PRESENT | Deleted: false
+ID: 5 | Name: Espresso | Branch: null | Image: PRESENT | Deleted: false
+ID: 6 | Name: Herbs | Branch: null | Image: PRESENT | Deleted: false
+ID: 1 | Name: Tea | Branch: null | Image: PRESENT | Deleted: false
+ID: 2 | Name: Turkish Coffee | Branch: null | Image: PRESENT | Deleted: false
+ID: 27 | Name: Tea | Branch: 1 | Image: NULL | Deleted: false
+ID: 28 | Name: Turkish Coffee | Branch: 1 | Image: NULL | Deleted: false
+ID: 29 | Name: French Coffee | Branch: 1 | Image: NULL | Deleted: false
+ID: 30 | Name: Nescafe | Branch: 1 | Image: NULL | Deleted: false
+ID: 31 | Name: Espresso | Branch: 1 | Image: NULL | Deleted: false
+ID: 32 | Name: Herbs | Branch: 1 | Image: NULL | Deleted: false

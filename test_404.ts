@@ -1,0 +1,13 @@
+async function test() {
+    const port = process.env.PORT || 5000;
+    try {
+        const res = await fetch(`http://localhost:${port}/api/non-existent-route`);
+        console.log("Status:", res.status);
+        const text = await res.text();
+        console.log("Body:", text);
+    } catch (e: any) {
+        console.error("Fetch failed:", e.message);
+    }
+}
+
+test();
