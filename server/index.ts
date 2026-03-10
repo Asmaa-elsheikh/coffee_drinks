@@ -81,16 +81,17 @@ if (process.env.NODE_ENV !== "test") {
       return res.status(status).json({ message });
     });
 
-    if (process.env.NODE_ENV === "production") {
-      serveStatic(app);
-    } else {
-      const { setupVite } = await import("./vite");
-      await setupVite(httpServer, app);
-    }
-
-    const port = parseInt(process.env.PORT || "5000", 10);
-    // Only listen if we're not on Vercel (Vercel handles the server execution)
+    // On Vercel, we don't need to manually serve static files or setup Vite,
+    // and we definitely shouldn't listen on a port because Vercel handles that natively.
     if (!process.env.VERCEL) {
+      if (process.env.NODE_ENV === "production") {
+        serveStatic(app);
+      } else {
+        const { setupVite } = await import("./vite");
+        await setupVite(httpServer, app);
+      }
+
+      const port = parseInt(process.env.PORT || "5000", 10);
       httpServer.listen(
         {
           port,
@@ -104,5 +105,6 @@ if (process.env.NODE_ENV !== "test") {
     }
   })();
 }
+
 
 
