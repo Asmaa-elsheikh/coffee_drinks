@@ -6,25 +6,48 @@ import { z } from "zod";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import session from "express-session";
-import createMemoryStore from "memorystore";
-
 import bcrypt from "bcrypt";
 import { supabase } from "./db";
 import { toCamel } from "./storage";
+import pg from "pg";
+import connectPg from "connect-pg-simple";
 
-const MemoryStore = createMemoryStore(session);
+const PostgresStore = connectPg(session);
+const pool = new pg.Pool({
+  connectionString: process.env.DATABASE_URL
+});
 
 export function registerRoutes(
   httpServer: Server,
   app: Express
 ): Server {
+  // Ensure session table exists (especially for Vercel/new environments)
+  pool.query(`
+    CREATE TABLE IF NOT EXISTS "session" (
+      "sid" varchar NOT NULL COLLATE "default",
+      "sess" json NOT NULL,
+      "expire" timestamp(6) NOT NULL
+    ) WITH (OIDS=FALSE);
+    
+    DO $$ 
+    BEGIN 
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'session_pkey') THEN
+        ALTER TABLE "session" ADD CONSTRAINT "session_pkey" PRIMARY KEY ("sid") NOT DEFERRABLE INITIALLY IMMEDIATE;
+      END IF;
+    END $$;
+
+    CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON "session" ("expire");
+  `).catch(err => console.error("Error ensuring session table exists:", err));
+
   // Auth Setup
   app.use(session({
     secret: process.env.SESSION_SECRET || "secret",
     resave: false,
     saveUninitialized: false,
-    store: new MemoryStore({
-      checkPeriod: 86400000 // prune expired entries every 24h
+    store: new PostgresStore({
+      pool: pool,
+      tableName: 'session',
+      createTableIfMissing: true // Double insurance
     }),
     cookie: {
       secure: process.env.NODE_ENV === "production",
