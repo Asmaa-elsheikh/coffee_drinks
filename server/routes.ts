@@ -1,120 +1,93 @@
-import type { Express } from "express";
-import { createServer, type Server } from "http";
+import type { Express, Request, Response, NextFunction } from "express";
+import { type Server } from "http";
 import { storage } from "./storage.js";
 import { api } from "../shared/routes.js";
 import { z } from "zod";
-import passport from "passport";
-import { Strategy as LocalStrategy } from "passport-local";
-import session from "express-session";
 import bcrypt from "bcrypt";
 import { supabase } from "./db.js";
 import { toCamel } from "./storage.js";
-import pg from "pg";
-import connectPg from "connect-pg-simple";
+import jwt from "jsonwebtoken";
 
-const PostgresStore = connectPg(session);
-const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL
-});
+const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-change-me";
 
 export function registerRoutes(
   httpServer: Server,
   app: Express
 ): Server {
-  // Ensure session table exists (especially for Vercel/new environments)
-  pool.query(`
-    CREATE TABLE IF NOT EXISTS "session" (
-      "sid" varchar NOT NULL COLLATE "default",
-      "sess" json NOT NULL,
-      "expire" timestamp(6) NOT NULL
-    ) WITH (OIDS=FALSE);
-    
-    DO $$ 
-    BEGIN 
-      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'session_pkey') THEN
-        ALTER TABLE "session" ADD CONSTRAINT "session_pkey" PRIMARY KEY ("sid") NOT DEFERRABLE INITIALLY IMMEDIATE;
-      END IF;
-    END $$;
+  // Middleware to check auth via JWT
+  const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
+    const token = req.cookies?.token;
+    if (!token) return res.sendStatus(401);
 
-    CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON "session" ("expire");
-  `).catch(err => console.error("Error ensuring session table exists:", err));
-
-  // Auth Setup
-  app.use(session({
-    secret: process.env.SESSION_SECRET || "secret",
-    resave: false,
-    saveUninitialized: false,
-    store: new PostgresStore({
-      pool: pool,
-      tableName: 'session',
-      createTableIfMissing: true // Double insurance
-    }),
-    cookie: {
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET) as any;
+      // We store the essential user info in the token to avoid DB lookups
+      (req as any).user = {
+        id: decoded.id,
+        role: decoded.role,
+        branchId: decoded.branchId,
+        email: decoded.email,
+        name: decoded.name
+      };
+      next();
+    } catch (err) {
+      console.error("JWT Verification failed:", err);
+      res.sendStatus(401);
     }
-  }));
+  };
 
-  app.use(passport.initialize());
-  app.use(passport.session());
-
-  passport.use(new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
+  // Auth Routes
+  app.post(api.auth.login.path, async (req, res) => {
+    const { email, password } = req.body;
     try {
       console.log(`Login attempt for: ${email}`);
       const user = await storage.getUserByEmail(email);
       if (!user) {
         console.log(`User not found: ${email}`);
-        return done(null, false, { message: "Incorrect email." });
+        return res.status(401).json({ message: "Incorrect email." });
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
         console.log(`Invalid password for: ${email}`);
-        return done(null, false, { message: "Incorrect password." });
+        return res.status(401).json({ message: "Incorrect password." });
       }
+
       console.log(`Successful login: ${email} (Role: ${user.role}, BranchID: ${user.branchId})`);
-      return done(null, user);
+      
+      const token = jwt.sign({ 
+        id: user.id,
+        role: user.role,
+        branchId: user.branchId,
+        email: user.email,
+        name: user.name
+      }, JWT_SECRET, { expiresIn: '24h' });
+      
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      });
+
+      res.json(user);
     } catch (err) {
       console.error(`Login error for ${email}:`, err);
-      return done(err);
-    }
-  }));
-
-  passport.serializeUser((user: any, done) => {
-    done(null, user.id);
-  });
-
-  passport.deserializeUser(async (id: number, done) => {
-    try {
-      const user = await storage.getUser(id);
-      done(null, user);
-    } catch (err) {
-      done(err);
+      res.status(500).json({ message: "Internal server error" });
     }
   });
 
-  // Auth Routes
-  app.post(api.auth.login.path, passport.authenticate("local"), (req, res) => {
-    res.json(req.user);
+  app.post(api.auth.logout.path, (req, res) => {
+    res.clearCookie("token");
+    res.json({ message: "Logged out" });
   });
 
-  app.post(api.auth.logout.path, (req, res, next) => {
-    req.logout((err) => {
-      if (err) return next(err);
-      res.json({ message: "Logged out" });
-    });
+  app.get(api.auth.me.path, requireAuth, async (req, res) => {
+    // For 'me' route, we can refetch from DB to ensure UI has latest data
+    // but protected routes use the token data for speed.
+    const user = await storage.getUser(((req as any).user).id);
+    res.json(user);
   });
-
-  app.get(api.auth.me.path, (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-    res.json(req.user);
-  });
-
-  // Middleware to check auth
-  const requireAuth = (req: any, res: any, next: any) => {
-    if (req.isAuthenticated()) return next();
-    res.sendStatus(401);
-  };
 
   // Branch Routes
   app.get("/api/branches", requireAuth, async (_req, res) => {
@@ -124,16 +97,16 @@ export function registerRoutes(
   });
 
   app.post("/api/branches", requireAuth, async (req, res) => {
-    const user = req.user as any;
+    const user = (req as any).user as any;
     if (user.role !== "superadmin") return res.sendStatus(403);
     const branch = await storage.createBranch(req.body);
     res.status(201).json(branch);
   });
 
   app.delete("/api/branches/:id", requireAuth, async (req, res) => {
-    const user = req.user as any;
+    const user = (req as any).user as any;
     if (user.role !== "superadmin") return res.sendStatus(403);
-    const id = parseInt(req.params.id);
+    const id = parseInt((req as any).params.id);
     // Note: We might want to prevent deleting branches with users/drinks
     await supabase.from('branches').delete().eq('id', id);
     res.sendStatus(204);
@@ -141,7 +114,7 @@ export function registerRoutes(
 
   // Drink Routes
   app.get(api.drinks.list.path, requireAuth, async (req, res) => {
-    const user = req.user as any;
+    const user = (req as any).user as any;
     const branchId = user.role === "superadmin"
       ? (req.query.branchId ? parseInt(req.query.branchId as string) : undefined)
       : (user.branchId ? parseInt(user.branchId.toString()) : undefined);
@@ -152,7 +125,7 @@ export function registerRoutes(
 
   // User Management Routes (formerly Employee Management)
   app.get("/api/admin/users", requireAuth, async (req, res) => {
-    const user = req.user as any;
+    const user = (req as any).user as any;
     if (user.role !== "admin" && user.role !== "superadmin") return res.sendStatus(403);
 
     let usersList;
@@ -173,7 +146,7 @@ export function registerRoutes(
   });
 
   app.post("/api/admin/users", requireAuth, async (req, res) => {
-    const user = req.user as any;
+    const user = (req as any).user as any;
     if (user.role !== "admin" && user.role !== "superadmin") return res.sendStatus(403);
 
     const { role, branchId, assignedKitchenId, email } = req.body;
@@ -211,7 +184,7 @@ export function registerRoutes(
   });
 
   app.patch("/api/admin/users/:id", requireAuth, async (req, res) => {
-    const user = req.user as any;
+    const user = (req as any).user as any;
     if (user.role !== "admin" && user.role !== "superadmin") return res.sendStatus(403);
 
     const { role, branchId, assignedKitchenId } = req.body;
@@ -243,16 +216,16 @@ export function registerRoutes(
   });
 
   app.delete("/api/admin/users/:id", requireAuth, async (req, res) => {
-    const user = req.user as any;
+    const user = (req as any).user as any;
     if (user.role !== "admin" && user.role !== "superadmin") return res.sendStatus(403);
-    const id = parseInt(req.params.id);
+    const id = parseInt((req as any).params.id);
     await storage.deleteUser(id);
     res.sendStatus(204);
   });
 
   app.post(api.drinks.create.path, requireAuth, async (req, res) => {
     try {
-      const user = req.user as any;
+      const user = (req as any).user as any;
       if (user.role !== "admin" && user.role !== "superadmin") return res.sendStatus(403);
 
       const input = api.drinks.create.input.parse(req.body);
@@ -271,7 +244,7 @@ export function registerRoutes(
   });
 
   app.patch(api.drinks.update.path, requireAuth, async (req, res) => {
-    const user = req.user as any;
+    const user = (req as any).user as any;
     if (user.role !== "admin" && user.role !== "superadmin" && user.email !== "asmaali.elsheikh@gmail.com") return res.sendStatus(403);
 
     const id = parseInt(req.params.id as string);
@@ -281,7 +254,7 @@ export function registerRoutes(
   });
 
   app.delete(api.drinks.delete.path, requireAuth, async (req, res) => {
-    const user = req.user as any;
+    const user = (req as any).user as any;
     if (user.role !== "admin" && user.role !== "superadmin") return res.sendStatus(403);
 
     await storage.deleteDrink(parseInt(req.params.id as string));
@@ -290,7 +263,7 @@ export function registerRoutes(
 
   // Order Routes
   app.get(api.orders.list.path, requireAuth, async (req, res) => {
-    const user = req.user as any;
+    const user = (req as any).user as any;
     const filters: any = {};
 
     // Fix History Views
@@ -323,7 +296,7 @@ export function registerRoutes(
 
   app.post(api.orders.create.path, requireAuth, async (req, res) => {
     try {
-      const user = req.user as any;
+      const user = (req as any).user as any;
       const input = api.orders.create.input.parse(req.body);
       console.log(`Creating order for user ${user.id} (Branch: ${user.branchId}, Kitchen: ${user.assignedKitchenId})`);
       const order = await storage.createOrder({
@@ -351,7 +324,7 @@ export function registerRoutes(
 
   // Analytics
   app.get(api.analytics.stats.path, requireAuth, async (req, res) => {
-    const user = req.user as any;
+    const user = (req as any).user as any;
     const filters: any = {};
     if (user.role === 'admin') filters.branchId = user.branchId;
     else if (user.role === 'superadmin' && req.query.branchId) filters.branchId = parseInt(req.query.branchId as string);

@@ -4,8 +4,10 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes.js";
 import { serveStatic } from "./static.js";
 import { createServer } from "http";
+import cookieParser from "cookie-parser";
 
 const app = express();
+app.use(cookieParser());
 const httpServer = createServer(app);
 
 declare module "http" {
