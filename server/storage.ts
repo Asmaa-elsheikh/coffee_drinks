@@ -1,4 +1,4 @@
-import { supabase } from "./db";
+import { supabase } from "./db.js";
 import { type User, type InsertUser, type Drink, type InsertDrink, type Order, type InsertOrder, type Branch, type InsertBranch } from "@shared/schema";
 import bcrypt from "bcrypt";
 

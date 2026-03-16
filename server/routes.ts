@@ -1,14 +1,14 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage } from "./storage.js";
 import { api } from "@shared/routes";
 import { z } from "zod";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import session from "express-session";
 import bcrypt from "bcrypt";
-import { supabase } from "./db";
-import { toCamel } from "./storage";
+import { supabase } from "./db.js";
+import { toCamel } from "./storage.js";
 import pg from "pg";
 import connectPg from "connect-pg-simple";
 
