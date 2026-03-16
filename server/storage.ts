@@ -1,5 +1,5 @@
 import { supabase } from "./db.js";
-import { type User, type InsertUser, type Drink, type InsertDrink, type Order, type InsertOrder, type Branch, type InsertBranch } from "@shared/schema";
+import { type User, type InsertUser, type Drink, type InsertDrink, type Order, type InsertOrder, type Branch, type InsertBranch } from "../shared/schema.js";
 import bcrypt from "bcrypt";
 
 const SALT_ROUNDS = 10;
