@@ -14,6 +14,20 @@ export function registerRoutes(
   httpServer: Server,
   app: Express
 ): Server {
+  const sanitizeUser = (user: any) => {
+    if (!user) return user;
+    const { password, ...safeUser } = user;
+    return safeUser;
+  };
+  
+  const sanitizeOrder = (order: any) => {
+    if (!order) return order;
+    if (order.user) {
+      order.user = sanitizeUser(order.user);
+    }
+    return order;
+  };
+
   // Middleware to check auth via JWT
   const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
     const token = req.cookies?.token;
@@ -70,7 +84,7 @@ export function registerRoutes(
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
       });
 
-      res.json(user);
+      res.json(sanitizeUser(user));
     } catch (err) {
       console.error(`Login error for ${email}:`, err);
       res.status(500).json({ message: "Internal server error" });
@@ -86,7 +100,7 @@ export function registerRoutes(
     // For 'me' route, we can refetch from DB to ensure UI has latest data
     // but protected routes use the token data for speed.
     const user = await storage.getUser(((req as any).user).id);
-    res.json(user);
+    res.json(sanitizeUser(user));
   });
 
   // Branch Routes
@@ -142,7 +156,7 @@ export function registerRoutes(
       const { data } = await supabase.from('users').select('*').eq('branch_id', user.branchId).order('name');
       usersList = (data || []).map(toCamel);
     }
-    res.json(usersList);
+    res.json(usersList.map(sanitizeUser));
   });
 
   app.post("/api/admin/users", requireAuth, async (req, res) => {
@@ -176,7 +190,7 @@ export function registerRoutes(
         assignedKitchenId: kId,
         username: email.split('@')[0]
       });
-      res.status(201).json(newUser);
+      res.status(201).json(sanitizeUser(newUser));
     } catch (err: any) {
       console.error("Error creating user:", err);
       res.status(400).json({ message: err.message || "Failed to create user" });
@@ -195,7 +209,7 @@ export function registerRoutes(
     if (user.role === "admin" && role === "admin") {
       return res.status(403).json({ message: "Branch Admins cannot grant Admin privileges." });
     }
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
 
     // Ensure numeric values and handle empty strings
     const updates = { ...req.body };
@@ -208,7 +222,7 @@ export function registerRoutes(
 
     try {
       const updated = await storage.updateUser(id, updates);
-      res.json(updated);
+      res.json(sanitizeUser(updated));
     } catch (err: any) {
       console.error("Error updating user:", err);
       res.status(400).json({ message: err.message || "Failed to update user" });
@@ -263,6 +277,7 @@ export function registerRoutes(
 
   // Order Routes
   app.get(api.orders.list.path, requireAuth, async (req, res) => {
+    res.setHeader("Cache-Control", "no-store, max-age=0");
     const user = (req as any).user as any;
     const filters: any = {};
 
@@ -274,7 +289,10 @@ export function registerRoutes(
     if (user.role === 'superadmin' || isKitchen) {
       // Superadmin and kitchen see everything or filter by branch if implemented
       if (req.query.branchId) filters.branchId = parseInt(req.query.branchId as string);
-      if (isKitchen) filters.kitchenId = user.id; // Kitchen only sees orders assigned to them
+      if (isKitchen) {
+        filters.branchId = user.branchId;
+        filters.kitchenId = user.id;
+      }
     } else if (user.role === 'admin') {
       // Admin sees their branch's orders
       filters.branchId = user.branchId;
@@ -291,7 +309,7 @@ export function registerRoutes(
     console.log(`Fetching orders for user ${user.id} (${user.role}) with filters:`, filters);
     const ordersData = await storage.getOrders(filters);
     console.log(`Found ${ordersData.length} orders. First order keys:`, ordersData[0] ? Object.keys(ordersData[0]) : 'none');
-    res.json(ordersData);
+    res.json(ordersData.map(sanitizeOrder));
   });
 
   app.post(api.orders.create.path, requireAuth, async (req, res) => {
@@ -306,7 +324,7 @@ export function registerRoutes(
         kitchenId: user.assignedKitchenId // Automatically assign to the user's kitchen
       });
       console.log(`Order created successfully: ID ${order.id}`);
-      res.status(201).json(order);
+      res.status(201).json(sanitizeOrder(order));
     } catch (err) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({ message: err.errors[0].message });
@@ -319,7 +337,7 @@ export function registerRoutes(
     const id = parseInt(req.params.id as string);
     const { status, rejectionReason } = req.body;
     const updated = await storage.updateOrderStatus(id, status, rejectionReason);
-    res.json(updated);
+    res.json(sanitizeOrder(updated));
   });
 
   // Analytics

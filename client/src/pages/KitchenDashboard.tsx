@@ -66,34 +66,36 @@ export default function KitchenDashboard() {
                   <p>No history records found.</p>
                 </div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Drink Name</TableHead>
-                      <TableHead className="text-center">Customer</TableHead>
-                      <TableHead className="text-center">Date</TableHead>
-                      <TableHead className="text-left">Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {orders.map((order) => (
-                      <TableRow key={order.id}>
-                        <TableCell className="font-medium">
-                          {order.drink.name}
-                        </TableCell>
-                        <TableCell className="text-center text-muted-foreground">
-                          {order.user.name}
-                        </TableCell>
-                        <TableCell className="text-center text-muted-foreground whitespace-nowrap">
-                          {format(new Date(order.createdAt), "MMM d, h:mm a")}
-                        </TableCell>
-                        <TableCell className="text-left">
-                          <StatusBadge status={order.status as any} />
-                        </TableCell>
+                <div className="overflow-x-auto">
+                  <Table className="min-w-[600px]">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Drink Name</TableHead>
+                        <TableHead className="text-center">Customer</TableHead>
+                        <TableHead className="text-center">Date</TableHead>
+                        <TableHead className="text-left">Status</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {orders.map((order) => (
+                        <TableRow key={order.id}>
+                          <TableCell className="font-medium">
+                            {order.drink.name}
+                          </TableCell>
+                          <TableCell className="text-center text-muted-foreground">
+                            {order.user.name}
+                          </TableCell>
+                          <TableCell className="text-center text-muted-foreground whitespace-nowrap">
+                            {format(new Date(order.createdAt), "MMM d, h:mm a")}
+                          </TableCell>
+                          <TableCell className="text-left">
+                            <StatusBadge status={order.status as any} />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               )}
             </div>
           </ScrollArea>

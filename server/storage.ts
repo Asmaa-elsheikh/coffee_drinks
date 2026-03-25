@@ -202,11 +202,14 @@ export class SupabaseStorage implements IStorage {
     if (filters?.userIds && filters.userIds.length > 0) {
       query = query.in('user_id', filters.userIds);
     }
-    if (filters?.branchId) {
-      query = query.eq('branch_id', filters.branchId);
-    }
     if (filters?.kitchenId) {
-      query = query.eq('kitchen_id', filters.kitchenId);
+      if (filters?.branchId) {
+        query = query.eq('branch_id', filters.branchId).or(`kitchen_id.eq.${filters.kitchenId},kitchen_id.is.null`);
+      } else {
+        query = query.or(`kitchen_id.eq.${filters.kitchenId},kitchen_id.is.null`);
+      }
+    } else if (filters?.branchId) {
+      query = query.eq('branch_id', filters.branchId);
     }
 
     const { data, error } = await query;

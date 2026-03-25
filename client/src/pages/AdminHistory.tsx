@@ -142,48 +142,50 @@ export default function AdminHistory() {
       </div>
 
       <Card className="rounded-2xl overflow-hidden border-border/50 shadow-sm">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Employee</TableHead>
-              <TableHead>Drinks Ordered</TableHead>
-              <TableHead className="text-right">Total</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
+        <div className="overflow-x-auto">
+          <Table className="min-w-[600px]">
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={4} className="h-32 text-center">
-                  <Loader2 className="animate-spin mx-auto text-primary" />
-                </TableCell>
+                <TableHead>Date</TableHead>
+                <TableHead>Employee</TableHead>
+                <TableHead>Drinks Ordered</TableHead>
+                <TableHead className="text-right">Total</TableHead>
               </TableRow>
-            ) : historyRows.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={4} className="h-32 text-center text-muted-foreground">
-                  No order history found.
-                </TableCell>
-              </TableRow>
-            ) : (
-              historyRows.map((row: any, idx) => (
-                <TableRow key={idx}>
-                  <TableCell className="font-medium">{row.date}</TableCell>
-                  <TableCell>{row.employeeName}</TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {Object.entries(row.drinks as Record<string, number>).map(([name, count]) => (
-                        <span key={name} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                          {name} x{count}
-                        </span>
-                      ))}
-                    </div>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="h-32 text-center">
+                    <Loader2 className="animate-spin mx-auto text-primary" />
                   </TableCell>
-                  <TableCell className="text-right font-bold">{row.totalCount}</TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ) : historyRows.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="h-32 text-center text-muted-foreground">
+                    No order history found.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                historyRows.map((row: any, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell className="font-medium">{row.date}</TableCell>
+                    <TableCell>{row.employeeName}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {Object.entries(row.drinks as Record<string, number>).map(([name, count]) => (
+                          <span key={name} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                            {name} x{count}
+                          </span>
+                        ))}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right font-bold">{row.totalCount}</TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </Card>
     </div>
   );
