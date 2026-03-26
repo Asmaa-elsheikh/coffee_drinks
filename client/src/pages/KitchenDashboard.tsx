@@ -219,10 +219,6 @@ export default function KitchenDashboard() {
                 {activeOrders.length} ACTIVE
               </span>
             </h2>
-            <div className="flex items-center gap-2 text-[10px] text-accent/80 uppercase font-black tracking-[0.2em] bg-accent/5 px-3 py-1.5 rounded-full border border-accent/10">
-              <span className="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
-              Live Prep
-            </div>
           </div>
 
           <div className="space-y-6">
@@ -266,10 +262,18 @@ export default function KitchenDashboard() {
                   </div>
 
                   <Button
-                    className="w-full font-black py-10 rounded-full transition-all active:scale-95 flex items-center justify-center gap-4 text-xs uppercase tracking-[0.25em] shadow-2xl border-none bg-accent text-accent-foreground hover:brightness-110 shadow-[0_0_30px_rgba(78,222,163,0.3)] glow-pulse"
-                    onClick={() => updateStatus({ id: order.id, status: 'ready' })}
+                    className={`w-full font-black py-10 rounded-full transition-all active:scale-95 flex items-center justify-center gap-4 text-xs uppercase tracking-[0.25em] shadow-2xl border-none ${
+                        order.status === "accepted" 
+                        ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+                        : "bg-accent text-accent-foreground hover:brightness-110 shadow-[0_0_30px_rgba(78,222,163,0.3)] glow-pulse"
+                    }`}
+                    onClick={() => updateStatus({ id: order.id, status: order.status === 'accepted' ? 'in_preparation' : 'ready' })}
                   >
-                    <CheckCircle2 size={24} className="stroke-[3px]" /> Mark Ready
+                    {order.status === "accepted" ? (
+                      <>Start Preparing</>
+                    ) : (
+                      <><CheckCircle2 size={24} className="stroke-[3px]" /> Mark Ready</>
+                    )}
                   </Button>
                 </Card>
               ))
