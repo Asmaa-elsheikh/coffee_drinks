@@ -5,20 +5,20 @@ type OrderStatus = "pending" | "accepted" | "in_preparation" | "ready" | "comple
 
 export function StatusBadge({ status }: { status: string }) {
   const config: Record<string, { label: string, color: string, icon: any }> = {
-    pending: { label: "Pending", color: "bg-yellow-100 text-yellow-800 border-yellow-200", icon: Clock },
-    accepted: { label: "Accepted", color: "bg-blue-100 text-blue-800 border-blue-200", icon: Check },
-    in_preparation: { label: "Brewing", color: "bg-orange-100 text-orange-800 border-orange-200", icon: Coffee },
-    ready: { label: "Ready to Pickup", color: "bg-green-100 text-green-800 border-green-200 animate-pulse", icon: CheckCircle2 },
-    completed: { label: "Completed", color: "bg-gray-100 text-gray-800 border-gray-200", icon: CheckCircle2 },
-    rejected: { label: "Rejected", color: "bg-red-100 text-red-800 border-red-200", icon: XCircle },
-    cancelled: { label: "Cancelled", color: "bg-gray-100 text-gray-500 border-gray-200 line-through opacity-70", icon: XCircle },
+    pending: { label: "PENDING", color: "bg-muted text-muted-foreground border-transparent", icon: Clock },
+    accepted: { label: "ACCEPTED", color: "bg-primary/20 text-primary border-transparent", icon: Check },
+    in_preparation: { label: "BREWING", color: "bg-secondary text-secondary-foreground border-transparent", icon: Coffee },
+    ready: { label: "READY", color: "bg-accent/20 text-accent border-accent/20 glow-pulse", icon: CheckCircle2 },
+    completed: { label: "COMPLETED", color: "bg-muted/50 text-muted-foreground border-transparent", icon: CheckCircle2 },
+    rejected: { label: "REJECTED", color: "bg-destructive/20 text-destructive border-transparent", icon: XCircle },
+    cancelled: { label: "CANCELLED", color: "bg-muted/50 text-muted-foreground border-transparent line-through opacity-70", icon: XCircle },
   };
 
-  const { label, color, icon: Icon } = config[status] || { label: status, color: "bg-gray-100 text-gray-800", icon: AlertCircle };
+  const { label, color, icon: Icon } = config[status] || { label: status.toUpperCase(), color: "bg-muted text-muted-foreground", icon: AlertCircle };
 
   return (
-    <Badge variant="outline" className={`${color} px-3 py-1 rounded-full gap-1.5 border`}>
-      <Icon size={14} />
+    <Badge variant="outline" className={`${color} px-3 py-1 rounded-full gap-1.5 uppercase text-[10px] tracking-wider font-bold border`}>
+      <Icon size={12} />
       {label}
     </Badge>
   );

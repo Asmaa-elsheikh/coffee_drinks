@@ -154,14 +154,21 @@ export class SupabaseStorage implements IStorage {
     const { data } = await query.order('name');
     const drinks = (data || []).map(toCamel);
     if (drinks.length === 0 && !branchId) {
-      // Return hardcoded basic list if DB is empty and no specific branch requested
+      // Return hardcoded basic list
       return [
         { id: 1, name: "Tea", category: "Tea", preparationTime: 3, isAvailable: true, description: "Classic hot tea", deleted: false, imageUrl: null, branchId: null },
         { id: 2, name: "Turkish Coffee", category: "Coffee", preparationTime: 5, isAvailable: true, description: "Traditional Turkish coffee", deleted: false, imageUrl: null, branchId: null },
         { id: 3, name: "Nescafe", category: "Coffee", preparationTime: 2, isAvailable: true, description: "Quick instant coffee", deleted: false, imageUrl: null, branchId: null }
       ];
     }
-    return drinks;
+
+    // Safety: Remove duplicates by name to prevent doubling in Superadmin views
+    const seen = new Set();
+    return drinks.filter(d => {
+      const duplicate = seen.has(d.name.toLowerCase());
+      seen.add(d.name.toLowerCase());
+      return !duplicate;
+    });
   }
 
   async getDrink(id: number): Promise<Drink | undefined> {

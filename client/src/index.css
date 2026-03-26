@@ -1,63 +1,49 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Outfit:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  /* Clean, modern, efficient palette */
-  --font-sans: 'DM Sans', sans-serif;
-  --font-display: 'Outfit', sans-serif;
+  /* The Digital Concierge - Stitch Design System */
+  --font-sans: 'Inter', sans-serif;
+  --font-display: 'Manrope', sans-serif;
 
-  /* HSL Values */
-  --background: 210 20% 98%;
-  --foreground: 222 47% 11%;
+  /* Enforcing Dark Mode Palette by default as per guidelines */
+  --background: 222 55% 10%; /* #0b1326 surface */
+  --foreground: 226 90% 92%; /* #dae2fd on-surface */
 
-  --primary: 221 83% 53%;
-  --primary-foreground: 210 40% 98%;
+  --card: 222 38% 14%; /* #171f33 surface-container */
+  --card-foreground: 226 90% 92%;
+  
+  --popover: 221 28% 19%; /* #222a3d surface-container-high */
+  --popover-foreground: 226 90% 92%;
 
-  --secondary: 210 40% 96%;
-  --secondary-foreground: 222 47% 11%;
+  --primary: 226 39% 81%; /* #bec6e0 primary */
+  --primary-foreground: 223 26% 21%;
 
-  --muted: 210 40% 96%;
-  --muted-foreground: 215 16% 47%;
+  --secondary: 216 42% 80%; /* #b7c8e1 secondary */
+  --secondary-foreground: 222 55% 10%;
 
-  --accent: 142 76% 36%;
-  /* Fresh green for success/availability */
-  --accent-foreground: 356 29% 98%;
+  --muted: 222 35% 16%; /* #131b2e surface-container-low */
+  --muted-foreground: 240 7% 79%; /* #c6c6cd on-surface-variant */
 
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 210 40% 98%;
+  --accent: 155 66% 59%; /* #4edea3 tertiary/emerald */
+  --accent-foreground: 159 100% 11%;
 
-  --border: 214 32% 91%;
-  --input: 214 32% 91%;
-  --ring: 221 83% 53%;
+  --destructive: 3 100% 50%;
+  --destructive-foreground: 0 100% 100%;
 
-  --radius: 0.75rem;
+  --border: 233 5% 29%; /* #45464d outline-variant */
+  --input: 222 38% 14%;
+  --ring: 155 66% 59%;
+
+  --radius: 1rem; /* Soft corners requirement */
 }
 
-.dark {
-  --background: 222 47% 11%;
-  --foreground: 210 40% 98%;
-
-  --primary: 217 91% 60%;
-  --primary-foreground: 222 47% 11%;
-
-  --secondary: 217 32% 17%;
-  --secondary-foreground: 210 40% 98%;
-
-  --muted: 217 32% 17%;
-  --muted-foreground: 215 20% 65%;
-
-  --accent: 142 70% 45%;
-  --accent-foreground: 210 40% 98%;
-
-  --destructive: 0 62% 30%;
-  --destructive-foreground: 210 40% 98%;
-
-  --border: 217 32% 17%;
-  --input: 217 32% 17%;
-  --ring: 217 91% 60%;
+/* Force dark mode everywhere in case it was a bright system */
+@media (prefers-color-scheme: light) {
+  /* We maintain the identical theme to enforce "The Digital Concierge" dark mode */
 }
 
 @layer base {
@@ -80,11 +66,23 @@
 /* Custom utilities for beautiful cards */
 @layer components {
   .glass-card {
-    @apply bg-white/80 dark:bg-black/40 backdrop-blur-md border border-white/20 dark:border-white/10 shadow-xl;
+    background: rgba(45, 52, 73, 0.6);
+    backdrop-filter: blur(20px);
+    border: none;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  }
+  
+  /* Adding pulse animation for status badges */
+  .glow-pulse {
+    animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 
   .hover-scale {
-    @apply transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98];
+    @apply transition-all duration-200 hover:scale-[1.02] active:scale-[0.98];
+    /* Hover scale for cards */
+    &:hover {
+      background-color: #31394d; /* surface-bright per guidelines */
+    }
   }
 
   .scrollbar-hide::-webkit-scrollbar {
@@ -105,8 +103,21 @@
 }
 
 @keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(78, 222, 163, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(78, 222, 163, 0.6);
   }
 }

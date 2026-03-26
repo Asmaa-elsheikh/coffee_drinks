@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Concierge - Corporate Cafe Menu</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary-container": "#009365",
+              "on-background": "#dae2fd",
+              "on-secondary": "#213145",
+              "outline-variant": "#45464d",
+              "error": "#ffb4ab",
+              "surface-container-low": "#131b2e",
+              "primary": "#bec6e0",
+              "tertiary-fixed-dim": "#4edea3",
+              "tertiary": "#4edea3",
+              "surface-container-highest": "#2d3449",
+              "on-secondary-fixed": "#0b1c30",
+              "inverse-on-surface": "#283044",
+              "secondary": "#b7c8e1",
+              "outline": "#909097",
+              "on-tertiary-fixed-variant": "#005236",
+              "on-surface-variant": "#c6c6cd",
+              "on-secondary-container": "#a9bad3",
+              "secondary-fixed": "#d3e4fe",
+              "secondary-fixed-dim": "#b7c8e1",
+              "primary-fixed": "#dae2fd",
+              "tertiary-container": "#001c10",
+              "surface-container-high": "#222a3d",
+              "surface-container": "#171f33",
+              "tertiary-fixed": "#6ffbbe",
+              "primary-fixed-dim": "#bec6e0",
+              "inverse-primary": "#565e74",
+              "on-error-container": "#ffdad6",
+              "error-container": "#93000a",
+              "surface": "#0b1326",
+              "on-primary-fixed": "#131b2e",
+              "surface-variant": "#2d3449",
+              "on-error": "#690005",
+              "on-secondary-fixed-variant": "#38485d",
+              "background": "#0b1326",
+              "on-primary": "#283044",
+              "on-surface": "#dae2fd",
+              "inverse-surface": "#dae2fd",
+              "surface-dim": "#0b1326",
+              "on-tertiary": "#003824",
+              "on-primary-container": "#798098",
+              "on-primary-fixed-variant": "#3f465c",
+              "surface-container-lowest": "#060e20",
+              "surface-bright": "#31394d",
+              "secondary-container": "#3a4a5f",
+              "on-tertiary-fixed": "#002113",
+              "surface-tint": "#bec6e0",
+              "primary-container": "#0f172a"
+            },
+            fontFamily: {
+              "headline": ["Outfit", "sans-serif"],
+              "body": ["Inter", "sans-serif"],
+              "label": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "3xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .glass-card {
+            background: rgba(23, 31, 51, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+        }
+
+        .premium-hover {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .premium-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -10px rgba(78, 222, 163, 0.15);
+            border-color: rgba(78, 222, 163, 0.3);
+            background: rgba(23, 31, 51, 0.6);
+        }
+
+        .emerald-glow {
+            box-shadow: 0 0 20px rgba(78, 222, 163, 0.2);
+        }
+
+        .animate-enter {
+            animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-[#060e20] text-on-background font-body selection:bg-tertiary selection:text-on-tertiary">
+<!-- Desktop Sidebar -->
+<aside class="fixed left-0 top-0 h-full hidden lg:flex flex-col py-8 bg-[#0b1326] w-72 border-r border-white/5 z-50">
+<div class="px-8 mb-12">
+<h1 class="text-[#dae2fd] font-headline font-bold text-2xl tracking-tight">Corporate Cafe</h1>
+<p class="text-tertiary text-[10px] font-bold uppercase tracking-[0.2em] opacity-80 mt-1">Premium Concierge</p>
+</div>
+<nav class="flex-1 space-y-2 px-4">
+<a class="flex items-center px-6 py-3.5 text-primary/60 hover:text-white hover:bg-white/5 rounded-2xl transition-all duration-300" href="#">
+<span class="material-symbols-outlined mr-4 opacity-70" data-icon="dashboard">dashboard</span>
+<span class="font-medium text-sm">Dashboard</span>
+</a>
+<a class="flex items-center px-6 py-3.5 text-tertiary bg-tertiary/10 rounded-2xl transition-all duration-300" href="#">
+<span class="material-symbols-outlined mr-4" data-icon="local_cafe">local_cafe</span>
+<span class="font-semibold text-sm">Drink Menu</span>
+</a>
+<a class="flex items-center px-6 py-3.5 text-primary/60 hover:text-white hover:bg-white/5 rounded-2xl transition-all duration-300" href="#">
+<span class="material-symbols-outlined mr-4 opacity-70" data-icon="hourglass_empty">hourglass_empty</span>
+<span class="font-medium text-sm">Active Orders</span>
+</a>
+<a class="flex items-center px-6 py-3.5 text-primary/60 hover:text-white hover:bg-white/5 rounded-2xl transition-all duration-300" href="#">
+<span class="material-symbols-outlined mr-4 opacity-70" data-icon="history">history</span>
+<span class="font-medium text-sm">History</span>
+</a>
+<a class="flex items-center px-6 py-3.5 text-primary/60 hover:text-white hover:bg-white/5 rounded-2xl transition-all duration-300" href="#">
+<span class="material-symbols-outlined mr-4 opacity-70" data-icon="settings">settings</span>
+<span class="font-medium text-sm">Settings</span>
+</a>
+</nav>
+<div class="px-8 mt-auto">
+<button class="w-full bg-tertiary text-[#002113] py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 emerald-glow hover:brightness-110 active:scale-[0.98] transition-all shadow-lg">
+<span class="material-symbols-outlined text-lg" data-icon="add">add</span>
+                New Order
+            </button>
+</div>
+</aside>
+<!-- Mobile Top Header -->
+<header class="fixed top-0 w-full z-50 bg-[#0b1326]/80 backdrop-blur-xl lg:hidden flex justify-between items-center px-6 h-20 border-b border-white/5">
+<div class="text-2xl font-bold text-[#dae2fd] tracking-tight font-headline">Concierge</div>
+<div class="flex gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-primary">
+<span class="material-symbols-outlined text-xl" data-icon="notifications">notifications</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-primary">
+<span class="material-symbols-outlined text-xl" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="lg:ml-72 min-h-screen pt-28 lg:pt-12 pb-32 px-6 lg:px-16 max-w-[1400px] mx-auto">
+<!-- Active Order Status (Contextual) -->
+<section class="mb-12 animate-enter">
+<div class="glass-card rounded-3xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 border-l-4 border-l-tertiary">
+<div class="flex items-center gap-6 w-full md:w-auto">
+<div class="w-14 h-14 rounded-2xl bg-tertiary/10 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-3xl" data-icon="coffee">coffee</span>
+</div>
+<div>
+<div class="flex items-center gap-3 mb-1">
+<h3 class="font-headline font-bold text-lg">Current Order: Nitro Cold Brew</h3>
+<span class="px-2.5 py-0.5 bg-tertiary/20 text-tertiary text-[10px] font-bold uppercase tracking-wider rounded-full">In Preparation</span>
+</div>
+<p class="text-sm text-primary/70">Estimated completion: <span class="text-tertiary font-semibold">3 minutes</span></p>
+</div>
+</div>
+<div class="flex gap-3 w-full md:w-auto">
+<button class="flex-1 md:flex-none px-6 py-2.5 bg-white/5 hover:bg-white/10 text-white text-sm font-semibold rounded-xl transition-colors">Order Details</button>
+<button class="flex-1 md:flex-none px-6 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-sm font-semibold rounded-xl transition-colors">Cancel</button>
+</div>
+</div>
+</section>
+<!-- Hero Featured Section -->
+<section class="relative rounded-[2.5rem] overflow-hidden mb-16 group shadow-2xl">
+<div class="absolute inset-0 bg-gradient-to-r from-[#060e20] via-[#060e20]/40 to-transparent z-10"></div>
+<img alt="Featured Drink" class="w-full h-[350px] lg:h-[450px] object-cover object-center group-hover:scale-105 transition-transform duration-1000" data-alt="Close-up of a nitro cold brew coffee" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpNWIfC6gml6P1sln-UwCPN0FfRNSlah98YVdAz5LuqGQTp4sv-AOuxgK3vfdrWtqUSfiMdAljgChz78ej8enmXQkp2X6sMo6UuzH53p7ZLOu0l09jcg_OzyT3RVHiXhPIyD0RPZBvGSGBYP2aHV5cp8MmQ_i1TpLQy8pcOzTWuVKVyNJ8EQKSpBOWWMLcWju1oLRXg4Q3fE7vUG8Mp5zEXORIj1zS3ti65Msvixg5XXV2d8fBHxxvMJv_JWHrgXj71sRZHTHVWE0"/>
+<div class="absolute inset-0 z-20 flex flex-col justify-center px-10 lg:px-20">
+<span class="text-tertiary font-bold tracking-[0.3em] text-[10px] uppercase mb-4 block">Seasonal Signature</span>
+<h2 class="text-5xl lg:text-7xl font-headline font-bold text-white mb-6 leading-[1.1]">Nitro Cold <br/><span class="text-tertiary">Brew</span></h2>
+<p class="text-primary/80 max-w-lg mb-10 text-base lg:text-lg leading-relaxed font-light">Velvety smooth, naturally sweet, and infused with nitrogen for a creamy finish that redefines your workspace ritual.</p>
+<div class="flex items-center gap-4">
+<button class="bg-tertiary text-[#002113] px-10 py-4 rounded-2xl font-bold text-sm emerald-glow hover:brightness-110 active:scale-95 transition-all">Quick Order</button>
+<span class="text-white/60 text-sm font-medium">$5.50 • 120 kcal</span>
+</div>
+</div>
+</section>
+<!-- Search & Filter Bar -->
+<section class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
+<div>
+<h3 class="text-3xl font-headline font-bold text-on-background mb-2">Morning Selection</h3>
+<p class="text-primary/60 text-base font-light">Curated coffee and tea for the elite workspace.</p>
+</div>
+<div class="relative w-full md:w-96">
+<span class="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-primary/40" data-icon="search">search</span>
+<input class="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-14 pr-6 text-on-background placeholder:text-primary/30 focus:bg-white/10 focus:ring-1 focus:ring-tertiary focus:border-tertiary/50 transition-all outline-none" placeholder="Search menu..." type="text"/>
+</div>
+</section>
+<!-- Menu Grid -->
+<section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8 mb-20">
+<!-- Item 1 -->
+<div class="glass-card p-8 rounded-3xl premium-hover group cursor-pointer">
+<div class="flex justify-between items-start mb-8">
+<div class="w-24 h-24 rounded-2xl overflow-hidden shadow-xl ring-1 ring-white/10">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="Artisanal matcha green tea" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6uZ7TSiSujzd0TfUt7NUbNTzKJj-Zab-KULEc19lDWgvRNCQvlxFRXbdPgWjbeuKXHRY20yg92aNK-6A1IyhnGIYuD_sm83IjVKrfJzAfy-OYme3EbgviT5VBLbHFmAiXBoatBuVO1c7XI0u7AGRBO1pP-JQCxs68EmjtAq9-H_A3O_GjOSxiAsFLeYBR_8KVNwGX-PR3FkMdOzRSZZ6rX2KSlWDJVwP_E_QB-jQK6EzlSfS5_kRaN2XM4Je8nAtvVdb-OlGU3tc"/>
+</div>
+<span class="text-tertiary text-xl font-bold font-headline">$6.50</span>
+</div>
+<h4 class="text-2xl font-headline font-bold text-white mb-3">Emerald Matcha</h4>
+<p class="text-primary/60 text-sm mb-8 leading-relaxed font-light">Ceremonial grade Uji matcha whisked with oat milk and a hint of organic vanilla bean.</p>
+<div class="flex items-center gap-3">
+<span class="px-3 py-1.5 bg-white/5 rounded-lg text-[10px] uppercase font-bold text-tertiary tracking-widest ring-1 ring-tertiary/20">Antioxidant</span>
+<span class="px-3 py-1.5 bg-white/5 rounded-lg text-[10px] uppercase font-bold text-primary/70 tracking-widest ring-1 ring-white/5">Vegan</span>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="glass-card p-8 rounded-3xl premium-hover group cursor-pointer">
+<div class="flex justify-between items-start mb-8">
+<div class="w-24 h-24 rounded-2xl overflow-hidden shadow-xl ring-1 ring-white/10">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="Double shot espresso" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCU6gqVwqzQLvGVvL_VElJ1GQpHUTXnwcGI7D-cIqbaGSM0ROeUpZNbLt5Elurl2NLxnGYMotoTGJSvhuS708X3IKP4YHtZc2ytmlJSQdS_sW9kzIFDzgIuuwk87zxjjUYDD9yhgwJlH6u4pWtdR4g_PR28MbznMdH6ospk9SJfxoIPMXZKCcv9XVXcbXYjFqHJW-FW7AKbKIiqnW1Cg-JJjHQ7wrkzAH1ZxUMApHMeAsoRJ26j9PLfFf7aNewUo7YqAlk4yhNGIfA"/>
+</div>
+<span class="text-tertiary text-xl font-bold font-headline">$4.00</span>
+</div>
+<h4 class="text-2xl font-headline font-bold text-white mb-3">Midnight Espresso</h4>
+<p class="text-primary/60 text-sm mb-8 leading-relaxed font-light">A bold, single-origin dark-roasted double shot with complex notes of cacao.</p>
+<div class="flex items-center gap-3">
+<span class="px-3 py-1.5 bg-white/5 rounded-lg text-[10px] uppercase font-bold text-tertiary tracking-widest ring-1 ring-tertiary/20">Signature</span>
+<span class="px-3 py-1.5 bg-white/5 rounded-lg text-[10px] uppercase font-bold text-primary/70 tracking-widest ring-1 ring-white/5">Pure</span>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="glass-card p-8 rounded-3xl premium-hover group cursor-pointer">
+<div class="flex justify-between items-start mb-8">
+<div class="w-24 h-24 rounded-2xl overflow-hidden shadow-xl ring-1 ring-white/10">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="Iced caffe latte" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCyKiHdlopvtXy2Hm1M8c3LQHOdLwHuEudXmOeOaBo9dSMfc1wcFc77_5By-vYSLXuSqEkDLbiD_1rUyurSOuI8sbF_uvV0tyZFaxvKm26r6aTOfxt0yXGRL2WzjzGErKJvdUVas0S_A-o3lXqulMAGebS-t3Qs7MFEX_6SxsPWXgATBV-8LuC7U3PO-faAfqJBEZwhVagj2Dqz0S1L2Yrj6jHd6_HABoP8iNTPG3yZoSIuBvmM1-YpGzl7pjCpjbNFQQtUBwAEhVk"/>
+</div>
+<span class="text-tertiary text-xl font-bold font-headline">$5.75</span>
+</div>
+<h4 class="text-2xl font-headline font-bold text-white mb-3">Velvet Oat Latte</h4>
+<p class="text-primary/60 text-sm mb-8 leading-relaxed font-light">Slow-poured espresso over chilled organic oat milk and house-made maple.</p>
+<div class="flex items-center gap-3">
+<span class="px-3 py-1.5 bg-white/5 rounded-lg text-[10px] uppercase font-bold text-tertiary tracking-widest ring-1 ring-tertiary/20">Iced</span>
+<span class="px-3 py-1.5 bg-white/5 rounded-lg text-[10px] uppercase font-bold text-primary/70 tracking-widest ring-1 ring-white/5">Staff Pick</span>
+</div>
+</div>
+</section>
+<!-- Order History Table -->
+<section class="glass-card rounded-[2rem] p-8 lg:p-10">
+<div class="flex items-center justify-between mb-10">
+<h3 class="text-2xl font-headline font-bold text-white">Order History</h3>
+<button class="text-tertiary text-sm font-bold flex items-center gap-2 group">
+                    View Full Statement
+                    <span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+<div class="overflow-x-auto hide-scrollbar">
+<table class="w-full text-left border-separate border-spacing-y-3">
+<thead>
+<tr class="text-[10px] uppercase tracking-[0.2em] text-primary/40 font-bold">
+<th class="pb-4 px-6">Drink Order</th>
+<th class="pb-4 px-6 text-center">Date</th>
+<th class="pb-4 px-6 text-center">Status</th>
+<th class="pb-4 px-6 text-right">Amount</th>
+</tr>
+</thead>
+<tbody class="text-sm">
+<tr class="group cursor-pointer">
+<td class="py-5 px-6 rounded-l-2xl bg-white/[0.02] group-hover:bg-white/[0.05] transition-colors border-y border-l border-white/5">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-xl bg-tertiary/10 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-xl" data-icon="coffee">coffee</span>
+</div>
+<span class="font-bold text-white">Midnight Espresso</span>
+</div>
+</td>
+<td class="py-5 px-6 text-center bg-white/[0.02] group-hover:bg-white/[0.05] text-primary/60 transition-colors border-y border-white/5">Oct 24, 08:15 AM</td>
+<td class="py-5 px-6 text-center bg-white/[0.02] group-hover:bg-white/[0.05] transition-colors border-y border-white/5">
+<span class="px-3 py-1 bg-tertiary/10 text-tertiary text-[9px] font-extrabold uppercase tracking-wider rounded-full ring-1 ring-tertiary/30 inline-flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span>
+                                    Ready
+                                </span>
+</td>
+<td class="py-5 px-6 text-right rounded-r-2xl bg-white/[0.02] group-hover:bg-white/[0.05] font-headline font-bold text-white transition-colors border-y border-r border-white/5">$4.00</td>
+</tr>
+<tr class="group cursor-pointer">
+<td class="py-5 px-6 rounded-l-2xl bg-white/[0.02] group-hover:bg-white/[0.05] transition-colors border-y border-l border-white/5">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-primary/40">
+<span class="material-symbols-outlined text-xl" data-icon="local_drink">local_drink</span>
+</div>
+<span class="font-bold text-white">Emerald Matcha</span>
+</div>
+</td>
+<td class="py-5 px-6 text-center bg-white/[0.02] group-hover:bg-white/[0.05] text-primary/60 transition-colors border-y border-white/5">Oct 23, 10:42 AM</td>
+<td class="py-5 px-6 text-center bg-white/[0.02] group-hover:bg-white/[0.05] transition-colors border-y border-white/5">
+<span class="px-3 py-1 bg-white/5 text-primary/50 text-[9px] font-extrabold uppercase tracking-wider rounded-full ring-1 ring-white/10">Completed</span>
+</td>
+<td class="py-5 px-6 text-right rounded-r-2xl bg-white/[0.02] group-hover:bg-white/[0.05] font-headline font-bold text-white transition-colors border-y border-r border-white/5">$6.50</td>
+</tr>
+<tr class="group cursor-pointer">
+<td class="py-5 px-6 rounded-l-2xl bg-white/[0.02] group-hover:bg-white/[0.05] transition-colors border-y border-l border-white/5">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-primary/40">
+<span class="material-symbols-outlined text-xl" data-icon="icecream">icecream</span>
+</div>
+<span class="font-bold text-white">Nitro Cold Brew</span>
+</div>
+</td>
+<td class="py-5 px-6 text-center bg-white/[0.02] group-hover:bg-white/[0.05] text-primary/60 transition-colors border-y border-white/5">Oct 22, 09:05 AM</td>
+<td class="py-5 px-6 text-center bg-white/[0.02] group-hover:bg-white/[0.05] transition-colors border-y border-white/5">
+<span class="px-3 py-1 bg-white/5 text-primary/50 text-[9px] font-extrabold uppercase tracking-wider rounded-full ring-1 ring-white/10">Completed</span>
+</td>
+<td class="py-5 px-6 text-right rounded-r-2xl bg-white/[0.02] group-hover:bg-white/[0.05] font-headline font-bold text-white transition-colors border-y border-r border-white/5">$5.50</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</main>
+<!-- Mobile Bottom NavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 lg:hidden bg-[#0b1326]/90 backdrop-blur-xl flex justify-around items-center px-6 pb-8 pt-4 border-t border-white/5 shadow-2xl rounded-t-3xl">
+<a class="flex flex-col items-center text-primary/50 px-3 py-2 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined text-2xl mb-1" data-icon="home">home</span>
+<span class="text-[9px] font-bold uppercase tracking-widest">Home</span>
+</a>
+<a class="flex flex-col items-center text-tertiary bg-tertiary/10 px-4 py-2 rounded-2xl transition-all" href="#">
+<span class="material-symbols-outlined text-2xl mb-1" data-icon="restaurant_menu">restaurant_menu</span>
+<span class="text-[9px] font-bold uppercase tracking-widest">Menu</span>
+</a>
+<a class="flex flex-col items-center text-primary/50 px-3 py-2 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined text-2xl mb-1" data-icon="receipt_long">receipt_long</span>
+<span class="text-[9px] font-bold uppercase tracking-widest">Orders</span>
+</a>
+<a class="flex flex-col items-center text-primary/50 px-3 py-2 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined text-2xl mb-1" data-icon="person">person</span>
+<span class="text-[9px] font-bold uppercase tracking-widest">Profile</span>
+</a>
+</nav>
+<!-- Contextual FAB (Only on Menu/Home) -->
+<button class="fixed bottom-28 right-8 lg:bottom-12 lg:right-12 w-16 h-16 bg-tertiary text-[#002113] rounded-2xl shadow-2xl emerald-glow flex items-center justify-center hover:scale-110 active:scale-90 transition-all z-40">
+<span class="material-symbols-outlined text-3xl font-bold" data-icon="add">add</span>
+</button>
+</body></html>

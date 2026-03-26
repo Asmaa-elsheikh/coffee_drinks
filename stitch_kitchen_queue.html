@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Emerald Kitchen | Pro Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary-fixed-variant": "#005236",
+              "on-secondary-fixed": "#0b1c30",
+              "surface-container": "#171f33",
+              "secondary": "#b7c8e1",
+              "error": "#ffb4ab",
+              "on-primary-container": "#798098",
+              "surface-dim": "#0b1326",
+              "on-tertiary": "#003824",
+              "on-secondary-container": "#a9bad3",
+              "surface-container-high": "#222a3d",
+              "primary-fixed-dim": "#bec6e0",
+              "inverse-surface": "#dae2fd",
+              "on-tertiary-fixed": "#002113",
+              "inverse-primary": "#565e74",
+              "tertiary-container": "#001c10",
+              "background": "#0b1326",
+              "surface": "#0b1326",
+              "on-error-container": "#ffdad6",
+              "surface-container-low": "#131b2e",
+              "tertiary": "#4edea3",
+              "on-background": "#dae2fd",
+              "on-error": "#690005",
+              "on-primary-fixed-variant": "#3f465c",
+              "surface-variant": "#2d3449",
+              "surface-bright": "#31394d",
+              "on-surface-variant": "#c6c6cd",
+              "on-secondary-fixed-variant": "#38485d",
+              "secondary-fixed-dim": "#b7c8e1",
+              "secondary-fixed": "#d3e4fe",
+              "outline-variant": "#45464d",
+              "on-surface": "#dae2fd",
+              "error-container": "#93000a",
+              "surface-container-lowest": "#060e20",
+              "on-secondary": "#213145",
+              "tertiary-fixed-dim": "#4edea3",
+              "secondary-container": "#3a4a5f",
+              "on-primary-fixed": "#131b2e",
+              "primary-fixed": "#dae2fd",
+              "inverse-on-surface": "#283044",
+              "surface-container-highest": "#2d3449",
+              "outline": "#909097",
+              "on-tertiary-container": "#009365",
+              "on-primary": "#283044",
+              "surface-tint": "#bec6e0",
+              "tertiary-fixed": "#6ffbbe",
+              "primary-container": "#0f172a",
+              "primary": "#bec6e0"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(23, 31, 51, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        body {
+            background-color: #0b1326;
+            color: #dae2fd;
+            font-family: 'Inter', sans-serif;
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b1326;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2d3449;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="antialiased">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-40 bg-[#0b1326]/60 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.25)]">
+<div class="flex justify-between items-center px-8 h-20 w-full">
+<div class="flex items-center gap-6">
+<span class="text-xl font-bold text-[#4edea3] tracking-widest uppercase font-headline">Emerald Kitchen</span>
+<nav class="hidden md:flex gap-8">
+<a class="font-headline font-bold text-lg tracking-tight text-[#4edea3]" href="#">Live Orders</a>
+<a class="font-headline font-bold text-lg tracking-tight text-[#bec6e0]/70 hover:bg-[#222a3d] transition-all duration-200 px-3 py-1 rounded-lg" href="#">Order History</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex items-center bg-[#131b2e] px-4 py-2 rounded-full">
+<span class="material-symbols-outlined text-[#bec6e0] mr-2">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm text-[#bec6e0]" placeholder="Search orders..." type="text"/>
+</div>
+<button class="material-symbols-outlined text-[#bec6e0] p-2 hover:bg-[#222a3d] rounded-full transition-transform active:scale-90">notifications</button>
+<button class="material-symbols-outlined text-[#bec6e0] p-2 hover:bg-[#222a3d] rounded-full transition-transform active:scale-90">settings</button>
+<img alt="Chef profile" class="w-10 h-10 rounded-full border-2 border-[#4edea3] object-cover" data-alt="Close up portrait of a professional chef in white uniform with a confident expression in a dimly lit kitchen" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCB8MEZUkt4sC7llatV-Sezyn8iJdXCla7N4sjGPCSUM41WvNq_TX_tj4fUUJ9zYNM30WH3V_VTsLmNnfM5TfteZ6VOrmiRTbJEniAVwm297520aAxnI0JFsrohjDkesr1I8H2ctmACM_ggLkENc5Ws2d2GEoyPi9g3R_WCyGtbiA9V914FocVNW3yV3jkxJt3-ofzi4XjGFbz80cyjinFlDrzCndQLt67KWHLVKSO3IFRBkLml5Db7Pa2usjmy5ntCRftOjr-SQZ4"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar (Desktop Only) -->
+<aside class="h-screen w-64 fixed left-0 top-0 hidden md:flex flex-col bg-[#0b1326] py-8 gap-4 z-30 pt-24">
+<div class="px-6 mb-6">
+<div class="flex flex-col">
+<span class="text-[#4edea3] font-black font-headline uppercase tracking-wider text-xs">Main Branch</span>
+<span class="text-[#bec6e0]/50 font-manrope text-[10px] uppercase font-semibold">Kitchen Dashboard</span>
+</div>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-4 px-6 py-4 text-[#4edea3] border-r-4 border-[#4edea3] bg-[#131b2e] font-headline text-sm font-semibold uppercase tracking-wider transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+                Live Orders
+            </a>
+<a class="flex items-center gap-4 px-6 py-4 text-[#bec6e0]/50 hover:text-[#bec6e0] hover:bg-[#171f33] font-headline text-sm font-semibold uppercase tracking-wider transition-all duration-300" href="#">
+<span class="material-symbols-outlined">history</span>
+                Order History
+            </a>
+<a class="flex items-center gap-4 px-6 py-4 text-[#bec6e0]/50 hover:text-[#bec6e0] hover:bg-[#171f33] font-headline text-sm font-semibold uppercase tracking-wider transition-all duration-300" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+                Inventory
+            </a>
+<a class="flex items-center gap-4 px-6 py-4 text-[#bec6e0]/50 hover:text-[#bec6e0] hover:bg-[#171f33] font-headline text-sm font-semibold uppercase tracking-wider transition-all duration-300" href="#">
+<span class="material-symbols-outlined">insights</span>
+                Analytics
+            </a>
+</nav>
+<div class="mt-auto px-6">
+<button class="w-full bg-[#4edea3] text-[#003824] font-bold py-3 rounded-xl scale-95 active:scale-90 transition-transform shadow-[0_10px_20px_rgba(78,222,163,0.2)]">
+                New Manual Order
+            </button>
+</div>
+<div class="mt-8 flex flex-col gap-1">
+<a class="flex items-center gap-4 px-6 py-3 text-[#bec6e0]/50 hover:text-[#bec6e0] text-sm font-semibold transition-colors" href="#">
+<span class="material-symbols-outlined">help</span>
+                Support
+            </a>
+<a class="flex items-center gap-4 px-6 py-3 text-error/70 hover:text-error text-sm font-semibold transition-colors" href="#">
+<span class="material-symbols-outlined">logout</span>
+                Logout
+            </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-64 pt-24 pb-24 md:pb-8 px-6 md:px-10">
+<!-- Kitchen Stats Header -->
+<section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+<div class="bg-surface-container-low rounded-xl p-6 relative overflow-hidden">
+<div class="relative z-10">
+<p class="text-on-primary-container text-xs font-bold uppercase tracking-widest mb-1">Total Pending</p>
+<h3 class="text-3xl font-headline font-extrabold text-[#dae2fd]">12</h3>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined text-8xl">pending_actions</span>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-xl p-6 relative overflow-hidden">
+<div class="relative z-10">
+<p class="text-on-primary-container text-xs font-bold uppercase tracking-widest mb-1">Average Wait</p>
+<h3 class="text-3xl font-headline font-extrabold text-[#dae2fd]">4.2<span class="text-sm font-medium ml-1">min</span></h3>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined text-8xl">timer</span>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-xl p-6 relative overflow-hidden border-b-4 border-tertiary">
+<div class="relative z-10">
+<p class="text-on-primary-container text-xs font-bold uppercase tracking-widest mb-1">Peak Capacity</p>
+<h3 class="text-3xl font-headline font-extrabold text-tertiary">84%</h3>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined text-8xl text-tertiary">speed</span>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-xl p-6 relative overflow-hidden">
+<div class="relative z-10">
+<p class="text-on-primary-container text-xs font-bold uppercase tracking-widest mb-1">Items Ready</p>
+<h3 class="text-3xl font-headline font-extrabold text-[#dae2fd]">142</h3>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined text-8xl">check_circle</span>
+</div>
+</div>
+</section>
+<!-- Dashboard Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+<!-- Column 1: Incoming Requests -->
+<section class="space-y-6">
+<div class="flex items-center justify-between">
+<h2 class="text-2xl font-headline font-extrabold flex items-center gap-3">
+                        Incoming Requests
+                        <span class="bg-secondary-container text-on-secondary-container text-xs px-2 py-1 rounded-lg">8 NEW</span>
+</h2>
+<button class="text-sm text-primary font-semibold hover:underline">View All</button>
+</div>
+<div class="space-y-4">
+<!-- Order Card 1 (Pending) -->
+<div class="glass-card rounded-2xl p-6 hover:bg-surface-bright transition-all duration-300 group relative">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-4">
+<img alt="Latte" class="w-16 h-16 rounded-xl object-cover shadow-lg transform group-hover:scale-105 transition-transform" data-alt="Modern close-up of a latte with perfect rosette latte art in a dark ceramic cup on a charcoal stone surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAisqIW1ouipEaJLwBBLn1sMKpIcAn64W3-9-L3CtQZ9czAYSUQla_ihkdhWHf-JVddTzt-D7GkJ8tcafxBiA_9ZLH-GC9t1n_tejI-W_OfftaNxUGKo6QI-uA3kgTZ8C91puUruF9pOT3AE8XAUKnzvzGvuUrPykqW97CPcCGWdUDpoDxo-dYtDhSw3UmaGURFbidVrCX7giX1YNR3pAwlUqJz8tt46z09nCI0Lek4Y7ztzlhCLPSiZzFJHYzosJr8rh7r3Ai9zCs"/>
+<div>
+<h4 class="text-xl font-headline font-bold text-on-surface">Oat Milk Latte</h4>
+<p class="text-sm text-on-surface-variant font-medium">Order #8492 • Alex Rivera</p>
+</div>
+</div>
+<span class="text-xs font-bold uppercase tracking-tighter bg-surface-container-highest px-3 py-1 rounded-full text-on-surface-variant">2m ago</span>
+</div>
+<div class="bg-[#0b1326]/40 rounded-xl p-3 mb-6 border-l-4 border-primary">
+<p class="text-xs font-bold text-primary uppercase tracking-widest mb-1">Customizations</p>
+<div class="flex flex-wrap gap-2">
+<span class="text-xs bg-surface-container-high px-2 py-1 rounded-md text-on-surface">Extra Hot</span>
+<span class="text-xs bg-surface-container-high px-2 py-1 rounded-md text-on-surface">Double Shot</span>
+<span class="text-xs bg-surface-container-high px-2 py-1 rounded-md text-on-surface">Stevia</span>
+</div>
+</div>
+<div class="flex gap-3">
+<button class="flex-[2] bg-tertiary text-on-tertiary font-bold py-3 rounded-full hover:shadow-[0_0_20px_rgba(78,222,163,0.3)] transition-all active:scale-95">Accept Order</button>
+<button class="flex-1 border border-error/30 text-error hover:bg-error/10 font-bold py-3 rounded-full transition-all active:scale-95">Reject</button>
+<button class="w-12 h-12 flex items-center justify-center border border-outline-variant rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+</div>
+<!-- Order Card 2 (Pending) -->
+<div class="glass-card rounded-2xl p-6 hover:bg-surface-bright transition-all duration-300 group relative">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-4">
+<img alt="Avocado Toast" class="w-16 h-16 rounded-xl object-cover shadow-lg transform group-hover:scale-105 transition-transform" data-alt="Artisanal avocado toast on dark rye bread with poached egg and red chili flakes on a minimalist dark plate" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzL75k1nS7AhxBz9LVpcjtJ9icytUGNnhRqXomB5AIzli5Zyhv4VzMoahI8zVgzswCqR-ErgNVzTtOur6FhUVas6Ed50tqb9ca-kOGFEX2gRxnS7Aizw5WXul5awN75kywKwDnOp2z_pzaurZle9W-ZyJIjlgbd85MVzEXNRPess9IOgG5hYBRl9-aEOq7tLZZzmKbF8C2QJMe9H2WfT2ddM8MTDbKnDUqVmnCuDMQKpn3ONM9GMUPq0oYWsRFw0rWO6t3ledDdXs"/>
+<div>
+<h4 class="text-xl font-headline font-bold text-on-surface">Emerald Special Toast</h4>
+<p class="text-sm text-on-surface-variant font-medium">Order #8495 • Sarah Jenkins</p>
+</div>
+</div>
+<span class="text-xs font-bold uppercase tracking-tighter bg-surface-container-highest px-3 py-1 rounded-full text-on-surface-variant">5m ago</span>
+</div>
+<div class="bg-[#0b1326]/40 rounded-xl p-3 mb-6 border-l-4 border-primary">
+<p class="text-xs font-bold text-primary uppercase tracking-widest mb-1">Customizations</p>
+<div class="flex flex-wrap gap-2">
+<span class="text-xs bg-surface-container-high px-2 py-1 rounded-md text-on-surface">No Onions</span>
+<span class="text-xs bg-surface-container-high px-2 py-1 rounded-md text-on-surface">Extra Chilli Flakes</span>
+</div>
+</div>
+<div class="flex gap-3">
+<button class="flex-[2] bg-tertiary text-on-tertiary font-bold py-3 rounded-full hover:shadow-[0_0_20px_rgba(78,222,163,0.3)] transition-all active:scale-95">Accept Order</button>
+<button class="flex-1 border border-error/30 text-error hover:bg-error/10 font-bold py-3 rounded-full transition-all active:scale-95">Reject</button>
+<button class="w-12 h-12 flex items-center justify-center border border-outline-variant rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Column 2: In Progress -->
+<section class="space-y-6">
+<div class="flex items-center justify-between">
+<h2 class="text-2xl font-headline font-extrabold flex items-center gap-3">
+                        In Progress
+                        <span class="bg-tertiary-container text-on-tertiary-container text-xs px-2 py-1 rounded-lg">4 ACTIVE</span>
+</h2>
+<div class="flex items-center gap-2 text-xs text-on-surface-variant uppercase font-bold tracking-widest">
+<span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
+                        Live Prep
+                    </div>
+</div>
+<div class="space-y-4">
+<!-- Progress Card 1 -->
+<div class="bg-surface-container-high rounded-2xl p-6 border-l-8 border-tertiary shadow-xl relative overflow-hidden">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 bg-surface-bright rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-3xl text-tertiary">soup_kitchen</span>
+</div>
+<div>
+<h4 class="text-xl font-headline font-bold text-on-surface">Flat White</h4>
+<p class="text-sm text-on-surface-variant font-medium">Order #8488 • Marcus T.</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-xs font-bold text-tertiary uppercase mb-1">Status</p>
+<span class="text-xs font-black bg-tertiary/20 text-tertiary px-3 py-1 rounded-lg uppercase tracking-widest">Brewing</span>
+</div>
+</div>
+<div class="mb-6">
+<div class="flex justify-between text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">
+<span>Prep Time</span>
+<span class="text-tertiary">3:45 / 5:00</span>
+</div>
+<div class="w-full bg-[#0b1326] h-2 rounded-full overflow-hidden">
+<div class="bg-tertiary h-full rounded-full shadow-[0_0_10px_rgba(78,222,163,0.5)]" style="width: 75%"></div>
+</div>
+</div>
+<button class="w-full bg-tertiary text-on-tertiary font-bold py-3 rounded-full hover:shadow-[0_0_20px_rgba(78,222,163,0.3)] transition-all active:scale-95 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">check_circle</span>
+                            Mark as Ready
+                        </button>
+</div>
+<!-- Progress Card 2 -->
+<div class="bg-surface-container-high rounded-2xl p-6 border-l-8 border-secondary shadow-xl relative overflow-hidden">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 bg-surface-bright rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-3xl text-secondary">restaurant</span>
+</div>
+<div>
+<h4 class="text-xl font-headline font-bold text-on-surface">Quinoa Power Bowl</h4>
+<p class="text-sm text-on-surface-variant font-medium">Order #8485 • Elena G.</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-xs font-bold text-secondary uppercase mb-1">Status</p>
+<span class="text-xs font-black bg-secondary/20 text-secondary px-3 py-1 rounded-lg uppercase tracking-widest">Assembling</span>
+</div>
+</div>
+<div class="mb-6">
+<div class="flex justify-between text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">
+<span>Prep Time</span>
+<span class="text-secondary">8:10 / 10:00</span>
+</div>
+<div class="w-full bg-[#0b1326] h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 81%"></div>
+</div>
+</div>
+<button class="w-full bg-secondary text-on-secondary font-bold py-3 rounded-full transition-all active:scale-95 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">check_circle</span>
+                            Mark as Ready
+                        </button>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center h-16 px-4 pb-safe bg-[#0b1326]/80 backdrop-blur-lg md:hidden z-50 rounded-t-2xl border-t border-[#45464d]/15 shadow-[0_-10px_30px_rgba(0,0,0,0.3)]">
+<a class="flex flex-col items-center justify-center text-[#4edea3] bg-[#131b2e] rounded-xl px-4 py-1" href="#">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+<span class="font-manrope text-[10px] font-medium">Live</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#bec6e0]/60 active:bg-[#171f33]" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="font-manrope text-[10px] font-medium">History</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#bec6e0]/60 active:bg-[#171f33]" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-manrope text-[10px] font-medium">Stock</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#bec6e0]/60 active:bg-[#171f33]" href="#">
+<span class="material-symbols-outlined">insights</span>
+<span class="font-manrope text-[10px] font-medium">Data</span>
+</a>
+</nav>
+<!-- Decorative Floating Elements for Brand Soul -->
+<div class="fixed top-1/4 -right-20 w-64 h-64 bg-tertiary/5 rounded-full blur-[100px] pointer-events-none z-0"></div>
+<div class="fixed bottom-1/4 -left-20 w-64 h-64 bg-primary/5 rounded-full blur-[100px] pointer-events-none z-0"></div>
+</body></html>

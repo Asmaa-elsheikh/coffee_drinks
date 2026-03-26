@@ -243,9 +243,15 @@ export function registerRoutes(
       if (user.role !== "admin" && user.role !== "superadmin") return res.sendStatus(403);
 
       const input = api.drinks.create.input.parse(req.body);
+      
+      // Superadmin can create global drinks (branchId: null) or assign to their current branch
+      const bId = user.role === "superadmin"
+        ? (req.body.branchId || null) // Use body branch or null for global
+        : (user.branchId || null);
+
       const drink = await storage.createDrink({
         ...input,
-        branchId: user.role === "superadmin" ? (req.body.branchId || user.branchId) : user.branchId
+        branchId: bId
       });
       res.status(201).json(drink);
     } catch (err) {
@@ -258,13 +264,27 @@ export function registerRoutes(
   });
 
   app.patch(api.drinks.update.path, requireAuth, async (req, res) => {
-    const user = (req as any).user as any;
-    if (user.role !== "admin" && user.role !== "superadmin" && user.email !== "asmaali.elsheikh@gmail.com") return res.sendStatus(403);
+    try {
+      const user = (req as any).user as any;
+      if (user.role !== "admin" && user.role !== "superadmin" && user.email !== "asmaali.elsheikh@gmail.com") return res.sendStatus(403);
 
-    const id = parseInt(req.params.id as string);
-    const input = api.drinks.update.input.parse(req.body);
-    const updated = await storage.updateDrink(id, input);
-    res.json(updated);
+      const id = parseInt(req.params.id as string);
+      if (isNaN(id)) return res.status(400).json({ message: "Invalid drink ID" });
+
+      const input = api.drinks.update.input.parse(req.body);
+      
+      // Ensure we don't accidentally overwrite branchId unless explicitly provided
+      const updates = { ...input };
+      
+      const updated = await storage.updateDrink(id, updates);
+      res.json(updated);
+    } catch (err) {
+      console.error("Error updating drink:", err);
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+      res.status(500).json({ message: "Internal server error" });
+    }
   });
 
   app.delete(api.drinks.delete.path, requireAuth, async (req, res) => {
@@ -439,21 +459,31 @@ async function seed() {
       });
     }
 
-    // 5. Drinks for default branch
-    const drinks = await storage.getDrinks(defaultBranch.id);
-    if (drinks.length === 0) {
+    // 5. Drinks - Ensure all default drinks exist (Matcha, Tea, etc)
+    const allDrinks = await storage.getDrinks();
+    console.log(`Seeding: Checking for default drinks (found ${allDrinks.length} existing)...`);
+    {
       console.log("Seeding: Populating drinks for default branch...");
       const drinksList = [
-        { name: "Tea", category: "Tea", preparationTime: 3, isAvailable: true, description: "Classic hot tea", branchId: defaultBranch.id },
-        { name: "Turkish Coffee", category: "Coffee", preparationTime: 5, isAvailable: true, description: "Traditional Turkish coffee", branchId: defaultBranch.id },
-        { name: "French Coffee", category: "Coffee", preparationTime: 5, isAvailable: true, description: "Smooth French press coffee", branchId: defaultBranch.id },
-        { name: "Nescafe", category: "Coffee", preparationTime: 2, isAvailable: true, description: "Quick instant coffee", branchId: defaultBranch.id },
-        { name: "Espresso", category: "Coffee", preparationTime: 2, isAvailable: true, description: "Strong single shot", branchId: defaultBranch.id },
-        { name: "Herbs", category: "Tea", preparationTime: 4, isAvailable: true, description: "Assorted herbal infusion", branchId: defaultBranch.id }
+        { name: "Tea", category: "Tea", preparationTime: 3, isAvailable: true, description: "Classic hot tea", branchId: defaultBranch.id, imageUrl: "https://images.unsplash.com/photo-1544787210-2213d84ad96b?auto=format&fit=crop&q=80&w=800" },
+        { name: "Turkish Coffee", category: "Coffee", preparationTime: 5, isAvailable: true, description: "Traditional Turkish coffee", branchId: defaultBranch.id, imageUrl: "https://images.unsplash.com/photo-1579992357154-faf4bfe95b3d?auto=format&fit=crop&q=80&w=800" },
+        { name: "French Coffee", category: "Coffee", preparationTime: 5, isAvailable: true, description: "Smooth French press coffee", branchId: defaultBranch.id, imageUrl: "https://images.unsplash.com/photo-1595434066389-0117ed726756?auto=format&fit=crop&q=80&w=800" },
+        { name: "Nescafe", category: "Coffee", preparationTime: 2, isAvailable: true, description: "Quick instant coffee", branchId: defaultBranch.id, imageUrl: "https://images.unsplash.com/photo-1541173155373-ba22ba913027?auto=format&fit=crop&q=80&w=800" },
+        { name: "Espresso", category: "Coffee", preparationTime: 2, isAvailable: true, description: "Strong single shot", branchId: defaultBranch.id, imageUrl: "https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?auto=format&fit=crop&q=80&w=800" },
+        { name: "Herbs", category: "Tea", preparationTime: 4, isAvailable: true, description: "Assorted herbal infusion", branchId: defaultBranch.id, imageUrl: "https://images.unsplash.com/photo-1564890369478-c89ca6d9c8d4?auto=format&fit=crop&q=80&w=800" },
+        { name: "Matcha Latte", category: "Specialty", preparationTime: 4, isAvailable: true, description: "Premium grade stone-ground matcha with creamy milk.", branchId: defaultBranch.id, imageUrl: "https://images.unsplash.com/photo-1515823064-d6e0c04616a7?auto=format&fit=crop&q=80&w=800" }
       ];
 
       for (const drink of drinksList) {
-        await storage.createDrink(drink);
+        // If it exists but has no image, update it. Otherwise create it.
+        const existing = allDrinks.find(d => d.name.toLowerCase() === drink.name.toLowerCase());
+        if (existing) {
+          if (!existing.imageUrl) {
+            await storage.updateDrink(existing.id, { imageUrl: drink.imageUrl as string });
+          }
+        } else {
+          await storage.createDrink(drink);
+        }
       }
     }
     console.log("Seeding completed successfully.");
