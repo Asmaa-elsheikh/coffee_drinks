@@ -44,71 +44,69 @@ export default function EmployeeMenu() {
         </div>
 
         <Card className="rounded-2xl overflow-hidden border-border/50">
-          <ScrollArea className="h-[calc(100vh-250px)]">
+          <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-accent/20">
             <div className="p-0">
               {(!recentOrders || recentOrders.length === 0) ? (
                 <div className="p-8 text-center text-muted-foreground">No orders yet.</div>
               ) : (
-                <div className="overflow-x-auto">
-                  <Table className="min-w-[600px]">
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Drink Name</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Sugar</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="w-[120px] text-center"></TableHead>
+                <Table className="min-w-[800px]">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Drink Name</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Sugar</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="w-[120px] text-center"></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {recentOrders.map((order) => (
+                      <TableRow key={order.id}>
+                        <TableCell className="font-medium">{order.drink.name}</TableCell>
+                        <TableCell className="text-muted-foreground whitespace-nowrap">
+                          {format(new Date(order.createdAt), "MMM d, h:mm a")}
+                        </TableCell>
+                        <TableCell>{order.sugar || "None"}</TableCell>
+                        <TableCell>
+                          <StatusBadge status={order.status as any} />
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {order.status === "completed" && (
+                            <Button
+                              variant="default"
+                              size="sm"
+                              className="gap-2 rounded-xl bg-green-600 hover:bg-green-700 text-white shadow-sm border-0"
+                              disabled={isCreating}
+                              onClick={() => createOrder({
+                                drinkId: order.drinkId,
+                                userId: user.id,
+                                sugar: order.sugar || "None",
+                                notes: order.notes
+                              })}
+                            >
+                              <RotateCcw size={14} />
+                              Reorder
+                            </Button>
+                          )}
+                          {order.status === "pending" && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="gap-2 rounded-xl text-red-600 hover:text-red-700 hover:bg-red-50"
+                              onClick={() => updateStatus({ id: order.id, status: "cancelled" })}
+                            >
+                              <XCircle size={14} />
+                              Cancel
+                            </Button>
+                          )}
+                        </TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {recentOrders.map((order) => (
-                        <TableRow key={order.id}>
-                          <TableCell className="font-medium">{order.drink.name}</TableCell>
-                          <TableCell className="text-muted-foreground whitespace-nowrap">
-                            {format(new Date(order.createdAt), "MMM d, h:mm a")}
-                          </TableCell>
-                          <TableCell>{order.sugar || "None"}</TableCell>
-                          <TableCell>
-                            <StatusBadge status={order.status as any} />
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {order.status === "completed" && (
-                              <Button
-                                variant="default"
-                                size="sm"
-                                className="gap-2 rounded-xl bg-green-600 hover:bg-green-700 text-white shadow-sm border-0"
-                                disabled={isCreating}
-                                onClick={() => createOrder({
-                                  drinkId: order.drinkId,
-                                  userId: user.id,
-                                  sugar: order.sugar || "None",
-                                  notes: order.notes
-                                })}
-                              >
-                                <RotateCcw size={14} />
-                                Reorder
-                              </Button>
-                            )}
-                            {order.status === "pending" && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="gap-2 rounded-xl text-red-600 hover:text-red-700 hover:bg-red-50"
-                                onClick={() => updateStatus({ id: order.id, status: "cancelled" })}
-                              >
-                                <XCircle size={14} />
-                                Cancel
-                              </Button>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                    ))}
+                  </TableBody>
+                </Table>
               )}
             </div>
-          </ScrollArea>
+          </div>
         </Card>
       </div>
     );

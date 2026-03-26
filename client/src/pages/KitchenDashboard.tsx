@@ -58,7 +58,7 @@ export default function KitchenDashboard() {
         </div>
 
         <Card className="rounded-[2.5rem] overflow-hidden border-border/50 shadow-2xl glass-card">
-          <ScrollArea className="h-[calc(100vh-250px)]">
+          <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-accent/20">
             <div className="p-0">
               {(!orders || orders.length === 0) ? (
                 <div className="p-12 text-center text-muted-foreground">
@@ -66,39 +66,37 @@ export default function KitchenDashboard() {
                   <p>No history records found.</p>
                 </div>
               ) : (
-                <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-accent/20">
-                  <Table className="min-w-[700px]">
-                    <TableHeader>
-                      <TableRow className="border-border/10 hover:bg-transparent">
-                        <TableHead className="text-accent/70 font-display font-bold uppercase tracking-wider text-xs px-8 h-16">Drink Name</TableHead>
-                        <TableHead className="text-accent/70 font-display font-bold uppercase tracking-wider text-xs h-16">Customer</TableHead>
-                        <TableHead className="text-accent/70 font-display font-bold uppercase tracking-wider text-xs h-16">Date</TableHead>
-                        <TableHead className="text-accent/70 font-display font-bold uppercase tracking-wider text-xs h-16 pr-8">Status</TableHead>
+                <Table className="min-w-[800px]">
+                  <TableHeader>
+                    <TableRow className="border-border/10 hover:bg-transparent">
+                      <TableHead className="text-accent/70 font-display font-bold uppercase tracking-wider text-xs px-8 h-16">Drink Name</TableHead>
+                      <TableHead className="text-accent/70 font-display font-bold uppercase tracking-wider text-xs h-16">Customer</TableHead>
+                      <TableHead className="text-accent/70 font-display font-bold uppercase tracking-wider text-xs h-16">Date</TableHead>
+                      <TableHead className="text-accent/70 font-display font-bold uppercase tracking-wider text-xs h-16 pr-8">Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {orders.map((order) => (
+                      <TableRow key={order.id} className="border-border/5 group hover:bg-white/5 transition-colors">
+                        <TableCell className="font-bold py-8 px-8 text-lg">
+                          {order.drink.name}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground font-medium">
+                          {order.user.name}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground whitespace-nowrap">
+                          {format(new Date(order.createdAt), "MMM d, h:mm a")}
+                        </TableCell>
+                        <TableCell className="pr-8">
+                          <StatusBadge status={order.status as any} />
+                        </TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {orders.map((order) => (
-                        <TableRow key={order.id} className="border-border/5 group hover:bg-white/5 transition-colors">
-                          <TableCell className="font-bold py-8 px-8 text-lg">
-                            {order.drink.name}
-                          </TableCell>
-                          <TableCell className="text-muted-foreground font-medium">
-                            {order.user.name}
-                          </TableCell>
-                          <TableCell className="text-muted-foreground whitespace-nowrap">
-                            {format(new Date(order.createdAt), "MMM d, h:mm a")}
-                          </TableCell>
-                          <TableCell className="pr-8">
-                            <StatusBadge status={order.status as any} />
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                    ))}
+                  </TableBody>
+                </Table>
               )}
             </div>
-          </ScrollArea>
+          </div>
         </Card>
       </div>
     );
@@ -268,18 +266,10 @@ export default function KitchenDashboard() {
                   </div>
 
                   <Button
-                    className={`w-full font-black py-10 rounded-full transition-all active:scale-95 flex items-center justify-center gap-4 text-xs uppercase tracking-[0.25em] shadow-2xl border-none ${
-                        order.status === "accepted" 
-                        ? "bg-primary text-primary-foreground hover:bg-primary/90" 
-                        : "bg-accent text-accent-foreground hover:brightness-110 shadow-[0_0_30px_rgba(78,222,163,0.3)] glow-pulse"
-                    }`}
-                    onClick={() => updateStatus({ id: order.id, status: order.status === 'accepted' ? 'in_preparation' : 'ready' })}
+                    className="w-full font-black py-10 rounded-full transition-all active:scale-95 flex items-center justify-center gap-4 text-xs uppercase tracking-[0.25em] shadow-2xl border-none bg-accent text-accent-foreground hover:brightness-110 shadow-[0_0_30px_rgba(78,222,163,0.3)] glow-pulse"
+                    onClick={() => updateStatus({ id: order.id, status: 'ready' })}
                   >
-                    {order.status === "accepted" ? (
-                      <>Start Preparing</>
-                    ) : (
-                      <><CheckCircle2 size={24} className="stroke-[3px]" /> Mark Ready</>
-                    )}
+                    <CheckCircle2 size={24} className="stroke-[3px]" /> Mark Ready
                   </Button>
                 </Card>
               ))
