@@ -15,6 +15,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
+import { ChatBot } from "@/components/ChatBot";
 import { Button } from "@/components/ui/button";
 
 interface LayoutProps {
@@ -163,6 +164,9 @@ export function Layout({ children, showNav = true }: LayoutProps) {
           {children}
         </div>
       </main>
+
+      {/* AI Assistant FAB */}
+      {showNav && <ChatBot />}
     </div>
   );
 }

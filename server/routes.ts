@@ -379,6 +379,80 @@ export function registerRoutes(
     res.json(stats);
   });
 
+  // Chat API
+  app.post("/api/chat", requireAuth, async (req, res) => {
+    try {
+      const { message } = req.body;
+      if (!message) return res.status(400).json({ message: "Message is required" });
+
+      const user = (req as any).user;
+      const userMessage = message.toLowerCase();
+      const drinks = await storage.getDrinks();
+      
+      let reply = `I'm your BrewWait AI assistant, ${user.name.split(' ')[0]}! I can help you with drink recommendations, calorie information, and your order history.`;
+
+      if (userMessage.includes("calorie") || userMessage.includes("kcal") || userMessage.includes("fat") || userMessage.includes("healthy") || userMessage.includes("light")) {
+        // More robust drink matching: sort by name length descending to find longest matching name first (e.g. "Matcha Latte" before "Tea")
+        const foundDrink = drinks
+          .sort((a, b) => b.name.length - a.name.length)
+          .find(d => userMessage.includes(d.name.toLowerCase()));
+          
+        if (foundDrink) {
+          reply = `A ${foundDrink.name} has approximately ${foundDrink.calories ?? 'unknown'} calories. ${foundDrink.calories && foundDrink.calories < 50 ? "It's a great low-calorie choice!" : ""}`;
+        } else if (userMessage.includes("under") || userMessage.includes("below") || userMessage.includes("less") || userMessage.includes("low") || userMessage.includes("healthy")) {
+          // General healthy/low calorie request
+          const match = userMessage.match(/\d+/);
+          const limit = match ? parseInt(match[0]) : 50;
+          const lowCal = drinks.filter(d => d.calories !== null && d.calories <= limit);
+          
+          if (lowCal.length > 0) {
+            const drinkList = lowCal.slice(0, 5).map(d => `${d.name} (${d.calories} kcal)`).join(", ");
+            if (userMessage.includes("healthy")) {
+              reply = `Yes! We have several healthy options under ${limit} calories: ${drinkList}. Would you like to order one?`;
+            } else {
+              reply = `We have several drinks under ${limit} calories! Here are a few: ${drinkList}.`;
+            }
+          } else {
+            reply = `I don't see any drinks under ${limit} calories right now. Our herbal teas and black coffees are usually the healthiest and lowest in calories!`;
+          }
+        } else {
+          const lowCalSuggestions = drinks.filter(d => d.calories !== null && d.calories < 50).slice(0, 3).map(d => d.name);
+          reply = `I can tell you the calorie count for any of our drinks. For example, ${lowCalSuggestions.join(", ")} are all under 50 calories. Which one would you like to know more about?`;
+        }
+      } else if (userMessage.includes("order") || userMessage.includes("history") || userMessage.includes("latest") || userMessage.includes("last") || userMessage.includes("previous")) {
+        const userOrders = await storage.getOrders({ userId: user.id });
+        if (userOrders.length > 0) {
+          const latest = userOrders[0];
+          reply = `Your last drink was a ${latest.drink.name}, placed on ${new Date(latest.createdAt).toLocaleDateString()}. Its current status is "${latest.status}".`;
+        } else {
+          reply = "I don't see any previous orders for you. Ready to place your first one?";
+        }
+      } else if (userMessage.includes("who am i") || userMessage.includes("my profile") || userMessage.includes("my name")) {
+        reply = `You are ${user.name}, currently signed in as an ${user.role}. Your branch is ${user.branchId ? "Branch #" + user.branchId : "the Main Branch"}.`;
+      } else if (userMessage.includes("drink") || userMessage.includes("menu") || userMessage.includes("available") || userMessage.includes("have")) {
+        const availableDrinks = drinks.filter(d => d.isAvailable && !d.deleted).map(d => d.name);
+        reply = `We currently have ${availableDrinks.length} delicious drinks available: ${availableDrinks.join(", ")}. Which one would you like, ${user.name.split(' ')[0]}?`;
+      } else if (userMessage.includes("recommend") || userMessage.includes("suggest") || userMessage.includes("best") || userMessage.includes("good")) {
+        const popular = drinks.filter(d => d.isAvailable && !d.deleted).slice(0, 2).map(d => d.name);
+        reply = `Based on what's trending in the office, I'd recommend the ${popular.join(" or ")}. They're really popular right now!`;
+      } else if (userMessage.includes("vibes") || userMessage.includes("how are you") || userMessage.includes("feeling")) {
+        reply = "I'm feeling great and ready to serve! The office vibes are excellent today. What can I get started for you?";
+      } else if (userMessage.includes("hi") || userMessage.includes("hello") || userMessage.includes("hey") || userMessage.includes("help")) {
+        reply = `Hello ${user.name.split(' ')[0]}! I'm your BrewWait assistant. Ask me anything about our drinks, your order history, or calorie content!`;
+      } else {
+        reply = `I'm your BrewWait AI assistant, ${user.name.split(' ')[0]}! I can help you with drink recommendations, calorie information, and your order history. What's on your mind?`;
+      }
+
+      // Simulate a slight AI delay
+      setTimeout(() => {
+        res.json({ reply });
+      }, 600);
+    } catch (err) {
+      console.error("Chat error:", err);
+      res.status(500).json({ message: "Chat assistant is taking a break. Please try again later." });
+    }
+  });
+
   // API 404 Handler - MUST be before Vite catch-all
   // Using app.use("/api", ...) will capture all /api/... requests that didn't match above
   app.use("/api", (_req, res) => {
@@ -465,23 +539,29 @@ async function seed() {
     {
       console.log("Seeding: Populating drinks for default branch...");
       const drinksList = [
-        { name: "Tea", category: "Tea", preparationTime: 3, isAvailable: true, description: "Classic hot tea", branchId: defaultBranch.id, imageUrl: "https://images.unsplash.com/photo-1544787210-2213d84ad96b?auto=format&fit=crop&q=80&w=800" },
-        { name: "Turkish Coffee", category: "Coffee", preparationTime: 5, isAvailable: true, description: "Traditional Turkish coffee", branchId: defaultBranch.id, imageUrl: "https://images.unsplash.com/photo-1579992357154-faf4bfe95b3d?auto=format&fit=crop&q=80&w=800" },
-        { name: "French Coffee", category: "Coffee", preparationTime: 5, isAvailable: true, description: "Smooth French press coffee", branchId: defaultBranch.id, imageUrl: "https://images.unsplash.com/photo-1595434066389-0117ed726756?auto=format&fit=crop&q=80&w=800" },
-        { name: "Nescafe", category: "Coffee", preparationTime: 2, isAvailable: true, description: "Quick instant coffee", branchId: defaultBranch.id, imageUrl: "https://images.unsplash.com/photo-1541173155373-ba22ba913027?auto=format&fit=crop&q=80&w=800" },
-        { name: "Espresso", category: "Coffee", preparationTime: 2, isAvailable: true, description: "Strong single shot", branchId: defaultBranch.id, imageUrl: "https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?auto=format&fit=crop&q=80&w=800" },
-        { name: "Herbs", category: "Tea", preparationTime: 4, isAvailable: true, description: "Assorted herbal infusion", branchId: defaultBranch.id, imageUrl: "https://images.unsplash.com/photo-1564890369478-c89ca6d9c8d4?auto=format&fit=crop&q=80&w=800" },
-        { name: "Matcha Latte", category: "Specialty", preparationTime: 4, isAvailable: true, description: "Premium grade stone-ground matcha with creamy milk.", branchId: defaultBranch.id, imageUrl: "https://images.unsplash.com/photo-1515823064-d6e0c04616a7?auto=format&fit=crop&q=80&w=800" }
+        { name: "Tea", category: "Tea", preparationTime: 3, isAvailable: true, description: "Classic hot tea", branchId: defaultBranch.id, calories: 2, imageUrl: "https://images.unsplash.com/photo-1544787210-2213d84ad96b?auto=format&fit=crop&q=80&w=800" },
+        { name: "Turkish Coffee", category: "Coffee", preparationTime: 5, isAvailable: true, description: "Traditional Turkish coffee", branchId: defaultBranch.id, calories: 5, imageUrl: "https://images.unsplash.com/photo-1579992357154-faf4bfe95b3d?auto=format&fit=crop&q=80&w=800" },
+        { name: "French Coffee", category: "Coffee", preparationTime: 5, isAvailable: true, description: "Smooth French press coffee", branchId: defaultBranch.id, calories: 15, imageUrl: "https://images.unsplash.com/photo-1595434066389-0117ed726756?auto=format&fit=crop&q=80&w=800" },
+        { name: "Nescafe", category: "Coffee", preparationTime: 2, isAvailable: true, description: "Quick instant coffee", branchId: defaultBranch.id, calories: 45, imageUrl: "https://images.unsplash.com/photo-1541173155373-ba22ba913027?auto=format&fit=crop&q=80&w=800" },
+        { name: "Espresso", category: "Coffee", preparationTime: 2, isAvailable: true, description: "Strong single shot", branchId: defaultBranch.id, calories: 3, imageUrl: "https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?auto=format&fit=crop&q=80&w=800" },
+        { name: "Herbs", category: "Tea", preparationTime: 4, isAvailable: true, description: "Assorted herbal infusion", branchId: defaultBranch.id, calories: 2, imageUrl: "https://images.unsplash.com/photo-1564890369478-c89ca6d9c8d4?auto=format&fit=crop&q=80&w=800" },
+        { name: "Matcha Latte", category: "Specialty", preparationTime: 4, isAvailable: true, description: "Premium grade stone-ground matcha with creamy milk.", branchId: defaultBranch.id, calories: 120, imageUrl: "https://images.unsplash.com/photo-1515823064-d6e0c04616a7?auto=format&fit=crop&q=80&w=800" }
       ];
 
       for (const drink of drinksList) {
-        // If it exists but has no image, update it. Otherwise create it.
         const existing = allDrinks.find(d => d.name.toLowerCase() === drink.name.toLowerCase());
         if (existing) {
-          if (!existing.imageUrl) {
-            await storage.updateDrink(existing.id, { imageUrl: drink.imageUrl as string });
+          // Update missing fields
+          const updates: any = {};
+          if (!existing.imageUrl && drink.imageUrl) updates.imageUrl = drink.imageUrl;
+          if (existing.calories === null && drink.calories !== undefined) updates.calories = drink.calories;
+          
+          if (Object.keys(updates).length > 0) {
+            console.log(`Seeding: Updating ${drink.name} with new data...`);
+            await storage.updateDrink(existing.id, updates);
           }
         } else {
+          console.log(`Seeding: Creating drink ${drink.name}...`);
           await storage.createDrink(drink);
         }
       }

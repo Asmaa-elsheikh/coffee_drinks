@@ -152,13 +152,32 @@ export class SupabaseStorage implements IStorage {
       query = query.eq('branch_id', branchId);
     }
     const { data } = await query.order('name');
-    const drinks = (data || []).map(toCamel);
+    const drinksData = (data || []).map(toCamel);
+    
+    // Calorie fallback map for known drinks
+    const calorieMap: Record<string, number> = {
+      "tea": 2,
+      "turkish coffee": 5,
+      "nescafe": 45,
+      "french coffee": 15,
+      "espresso": 3,
+      "herbs": 2,
+      "matcha latte": 120
+    };
+
+    const drinks = drinksData.map(drink => {
+      if (drink.calories === null || drink.calories === undefined) {
+        drink.calories = calorieMap[drink.name.toLowerCase()] ?? null;
+      }
+      return drink;
+    });
+
     if (drinks.length === 0 && !branchId) {
       // Return hardcoded basic list
       return [
-        { id: 1, name: "Tea", category: "Tea", preparationTime: 3, isAvailable: true, description: "Classic hot tea", deleted: false, imageUrl: null, branchId: null },
-        { id: 2, name: "Turkish Coffee", category: "Coffee", preparationTime: 5, isAvailable: true, description: "Traditional Turkish coffee", deleted: false, imageUrl: null, branchId: null },
-        { id: 3, name: "Nescafe", category: "Coffee", preparationTime: 2, isAvailable: true, description: "Quick instant coffee", deleted: false, imageUrl: null, branchId: null }
+        { id: 1, name: "Tea", category: "Tea", preparationTime: 3, isAvailable: true, description: "Classic hot tea", calories: 2, deleted: false, imageUrl: null, branchId: null },
+        { id: 2, name: "Turkish Coffee", category: "Coffee", preparationTime: 5, isAvailable: true, description: "Traditional Turkish coffee", calories: 5, deleted: false, imageUrl: null, branchId: null },
+        { id: 3, name: "Nescafe", category: "Coffee", preparationTime: 2, isAvailable: true, description: "Quick instant coffee", calories: 45, deleted: false, imageUrl: null, branchId: null }
       ];
     }
 

@@ -26,6 +26,7 @@ export const drinks = pgTable("drinks", {
   category: text("category").notNull(),
   description: text("description"),
   imageUrl: text("image_url"),
+  calories: integer("calories"),
   preparationTime: integer("preparation_time").default(5),
   isAvailable: boolean("is_available").default(true).notNull(),
   deleted: boolean("deleted").default(false).notNull(),
